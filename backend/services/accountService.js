@@ -1,4 +1,4 @@
-import { Account, AppRecord, Group, ServiceTaxMaster, SubGroup, TDSMaster, PLSetting, BSMainGroup, BSGroup, ReverseCharge, BillWiseOpening } from "../models/index.js";
+import { Account, AppRecord, Group, ServiceTaxMaster, SubGroup, TDSMaster, PLSetting, BSMainGroup, BSGroup, ReverseCharge, BillWiseOpening, CForm, FForm, HForm, E1Form, CFormPurchase } from "../models/index.js";
 
 const unwrap = (row) => {
   const plain = row.toJSON();
@@ -53,7 +53,12 @@ export const getMastersState = async () => ({
   bsGroups: (await BSGroup.findAll()).map(unwrap),
   reverseTypes: (await ReverseCharge.findAll()).map(unwrap),
   billWiseOpenings: (await BillWiseOpening.findAll()).map(unwrap),
-  closingStock: await listAppRecords("closingStock")
+  closingStock: await listAppRecords("closingStock"),
+  cForms: (await CForm.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap),
+  fForms: (await FForm.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap),
+  hForms: (await HForm.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap),
+  e1Forms: (await E1Form.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap),
+  cFormPurchases: (await CFormPurchase.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap)
 });
 
 export const saveAccount = (data) => upsertByKey(Account, "code", data, "ACC");

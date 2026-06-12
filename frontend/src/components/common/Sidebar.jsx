@@ -13,7 +13,8 @@ import {
   Percent,
   ListRestart,
   CreditCard,
-  Search
+  Search,
+  ClipboardList
 } from "lucide-react";
 
 export default function Sidebar({ activeTab, setActiveTab, currentUser, setCurrentUser }) {
@@ -40,6 +41,12 @@ export default function Sidebar({ activeTab, setActiveTab, currentUser, setCurre
     { id: "reverse-bill", label: "Reverse Bill Entry", icon: PlusCircle, category: "Vouchers" },
     { id: "voucher-find", label: "Voucher Find", icon: Search, category: "Vouchers" },
     { id: "provisions-entry", label: "Provisions & Notes", icon: Briefcase, category: "Vouchers" },
+
+    { id: "c-form", label: "C Form", icon: ClipboardList, category: "Tax Forms" },
+    { id: "f-form", label: "F Form", icon: ClipboardList, category: "Tax Forms" },
+    { id: "h-form", label: "H Form", icon: ClipboardList, category: "Tax Forms" },
+    { id: "e1-form", label: "E1 Form", icon: ClipboardList, category: "Tax Forms" },
+    { id: "c-form-purchase", label: "C Form Purchase", icon: ClipboardList, category: "Tax Forms" },
 
     { id: "general-ledger", label: "General Ledger", icon: TrendingUp, category: "Reports" },
     { id: "trial-balance", label: "Trial Balance", icon: TrendingUp, category: "Reports" },
@@ -80,7 +87,7 @@ export default function Sidebar({ activeTab, setActiveTab, currentUser, setCurre
 
       {/* Main Navigation Item groups */}
       <div className="flex-1 overflow-y-auto py-4" id="sidebar-nav">
-        {["Core", "Masters", "Vouchers", "Reports", "System"].map(cat => {
+        {["Core", "Masters", "Vouchers", "Tax Forms", "Reports", "System"].map(cat => {
           const items = menuItems.filter(i => i.category === cat);
           if (items.length === 0) return null;
           return (

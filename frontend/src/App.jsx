@@ -18,6 +18,11 @@ import GeneralLedger from "./components/reports/GeneralLedger";
 import ContraEntry from "./components/vouchers/ContraEntry";
 import BankPayment from './components/vouchers/BankPayment';
 import VoucherFind from "./components/vouchers/VoucherFind";
+import CForm from "./components/vouchers/c-form";
+import FForm from "./components/vouchers/f-form";
+import HForm from "./components/vouchers/h-form";
+import E1Form from "./components/vouchers/e1-form";
+import CFormPurchase from "./components/vouchers/c-formPurchase";
 
 import { 
   getDB, 
@@ -48,7 +53,17 @@ import {
   deleteBillWiseOpening,
   computeTrialBalance,
   computeProfitLoss,
-  computeBalanceSheet
+  computeBalanceSheet,
+  saveCForm,
+  deleteCForm,
+  saveFForm,
+  deleteFForm,
+  saveHForm,
+  deleteHForm,
+  saveE1Form,
+  deleteE1Form,
+  saveCFormPurchase,
+  deleteCFormPurchase
 } from "./database";
 import { 
   TrendingUp, 
@@ -488,6 +503,38 @@ export default function App() {
                 onDeleteVoucher={deleteVoucher}
                 onPrint={triggerPrintModal}
               />
+            </div>
+          )}
+
+          {/* TAX FORMS ROUTING */}
+          {activeTab === "c-form" && (
+            <div className="flex-1 overflow-hidden flex flex-col" id="c-form-tab">
+              <PageHeader category="Tax Forms" title="C Form Register" description="Manage C Form declarations and invoice mapping." />
+              <CForm database={db} onSave={saveCForm} onDelete={deleteCForm} />
+            </div>
+          )}
+          {activeTab === "f-form" && (
+            <div className="flex-1 overflow-hidden flex flex-col" id="f-form-tab">
+              <PageHeader category="Tax Forms" title="F Form Register" description="Manage F Form declarations and invoice mapping." />
+              <FForm database={db} onSave={saveFForm} onDelete={deleteFForm} />
+            </div>
+          )}
+          {activeTab === "h-form" && (
+            <div className="flex-1 overflow-hidden flex flex-col" id="h-form-tab">
+              <PageHeader category="Tax Forms" title="H Form Register" description="Manage H Form declarations and invoice mapping." />
+              <HForm database={db} onSave={saveHForm} onDelete={deleteHForm} />
+            </div>
+          )}
+          {activeTab === "e1-form" && (
+            <div className="flex-1 overflow-hidden flex flex-col" id="e1-form-tab">
+              <PageHeader category="Tax Forms" title="E1 Form Register" description="Manage E1 Form declarations." />
+              <E1Form database={db} onSave={saveE1Form} onDelete={deleteE1Form} />
+            </div>
+          )}
+          {activeTab === "c-form-purchase" && (
+            <div className="flex-1 overflow-hidden flex flex-col" id="c-form-purchase-tab">
+              <PageHeader category="Tax Forms" title="C Form Purchase" description="Manage C Form Purchase records and bills." />
+              <CFormPurchase database={db} onSave={saveCFormPurchase} onDelete={deleteCFormPurchase} />
             </div>
           )}
 

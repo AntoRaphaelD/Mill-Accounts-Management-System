@@ -137,5 +137,10 @@ export const createSeedDatabase = () => ({
     { id: "CS-SEED-001", stockDate: "2026-04-17", description: "Finished yarn stock", debit: 0, credit: 42000 },
     { id: "CS-SEED-002", stockDate: "2026-04-17", description: "Packing material stock", debit: 0, credit: 8500 }
   ],
+  cForms: [],
+  fForms: [],
+  hForms: [],
+  e1Forms: [],
+  cFormPurchases: [],
   currentUser: "SIVA"
 });

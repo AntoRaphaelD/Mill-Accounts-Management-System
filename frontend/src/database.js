@@ -451,6 +451,107 @@ export function deleteClosingStock(id) {
   notifyDB();
 }
 
+// Tax Forms Operations
+export function getCForms() { return dbState.cForms; }
+export function saveCForm(item) {
+  const idx = dbState.cForms.findIndex(c => c.id === item.id);
+  let payload = { ...item };
+  if (idx >= 0) {
+    dbState.cForms[idx] = payload;
+  } else {
+    payload.id = "CF-" + Date.now();
+    dbState.cForms.unshift(payload);
+  }
+  addAuditLog("C FORM SAVE", `Saved C Form ${payload.cFormNo}`);
+  apiCall("/api/tax-forms/c-form", "POST", payload);
+  notifyDB();
+}
+export function deleteCForm(id) {
+  dbState.cForms = dbState.cForms.filter(c => c.id !== id);
+  apiCall(`/api/tax-forms/c-form/${id}`, "DELETE");
+  notifyDB();
+}
+
+export function getFForms() { return dbState.fForms; }
+export function saveFForm(item) {
+  const idx = dbState.fForms.findIndex(f => f.id === item.id);
+  let payload = { ...item };
+  if (idx >= 0) {
+    dbState.fForms[idx] = payload;
+  } else {
+    payload.id = "FF-" + Date.now();
+    dbState.fForms.unshift(payload);
+  }
+  addAuditLog("F FORM SAVE", `Saved F Form ${payload.fFormNo}`);
+  apiCall("/api/tax-forms/f-form", "POST", payload);
+  notifyDB();
+}
+export function deleteFForm(id) {
+  dbState.fForms = dbState.fForms.filter(f => f.id !== id);
+  apiCall(`/api/tax-forms/f-form/${id}`, "DELETE");
+  notifyDB();
+}
+
+export function getHForms() { return dbState.hForms; }
+export function saveHForm(item) {
+  const idx = dbState.hForms.findIndex(h => h.id === item.id);
+  let payload = { ...item };
+  if (idx >= 0) {
+    dbState.hForms[idx] = payload;
+  } else {
+    payload.id = "HF-" + Date.now();
+    dbState.hForms.unshift(payload);
+  }
+  addAuditLog("H FORM SAVE", `Saved H Form ${payload.hFormNo}`);
+  apiCall("/api/tax-forms/h-form", "POST", payload);
+  notifyDB();
+}
+export function deleteHForm(id) {
+  dbState.hForms = dbState.hForms.filter(h => h.id !== id);
+  apiCall(`/api/tax-forms/h-form/${id}`, "DELETE");
+  notifyDB();
+}
+
+export function getE1Forms() { return dbState.e1Forms; }
+export function saveE1Form(item) {
+  const idx = dbState.e1Forms.findIndex(e => e.id === item.id);
+  let payload = { ...item };
+  if (idx >= 0) {
+    dbState.e1Forms[idx] = payload;
+  } else {
+    payload.id = "E1-" + Date.now();
+    dbState.e1Forms.unshift(payload);
+  }
+  addAuditLog("E1 FORM SAVE", `Saved E1 Form ${payload.e1FormNo}`);
+  apiCall("/api/tax-forms/e1-form", "POST", payload);
+  notifyDB();
+}
+export function deleteE1Form(id) {
+  dbState.e1Forms = dbState.e1Forms.filter(e => e.id !== id);
+  apiCall(`/api/tax-forms/e1-form/${id}`, "DELETE");
+  notifyDB();
+}
+
+export function getCFormPurchases() { return dbState.cFormPurchases; }
+export function saveCFormPurchase(item) {
+  const idx = dbState.cFormPurchases.findIndex(c => c.id === item.id);
+  let payload = { ...item };
+  if (idx >= 0) {
+    dbState.cFormPurchases[idx] = payload;
+  } else {
+    payload.id = "CFP-" + Date.now();
+    dbState.cFormPurchases.unshift(payload);
+  }
+  addAuditLog("C FORM PURCHASE SAVE", `Saved C Form Purchase ${payload.cFormNo}`);
+  apiCall("/api/tax-forms/c-form-purchase", "POST", payload);
+  notifyDB();
+}
+export function deleteCFormPurchase(id) {
+  dbState.cFormPurchases = dbState.cFormPurchases.filter(c => c.id !== id);
+  apiCall(`/api/tax-forms/c-form-purchase/${id}`, "DELETE");
+  notifyDB();
+}
+
 
 // --- CALCULATED ACCOUNTING ENGINE ---
 

@@ -16,6 +16,11 @@ import defineReverseCharge from "./ReverseCharge.js";
 import defineContraEntry from "./ContraEntry.js";
 import defineContraEntryItem from "./ContraEntryItem.js";
 import defineBillWiseOpening from "./BillWiseOpening.js";
+import defineCForm from "./CForm.js";
+import defineFForm from "./FForm.js";
+import defineHForm from "./HForm.js";
+import defineE1Form from "./E1Form.js";
+import defineCFormPurchase from "./CFormPurchase.js";
 
 const User = defineUser(sequelize);
 const Account = defineAccount(sequelize);
@@ -33,6 +38,11 @@ const ReverseCharge = defineReverseCharge(sequelize);
 const ContraEntry = defineContraEntry(sequelize);
 const ContraEntryItem = defineContraEntryItem(sequelize);
 const BillWiseOpening = defineBillWiseOpening(sequelize);
+const CForm = defineCForm(sequelize);
+const FForm = defineFForm(sequelize);
+const HForm = defineHForm(sequelize);
+const E1Form = defineE1Form(sequelize);
+const CFormPurchase = defineCFormPurchase(sequelize);
 
 const AppRecord = sequelize.define("AppRecord", {
   collection: { type: DataTypes.STRING, primaryKey: true },
@@ -63,5 +73,10 @@ export {
   ReverseCharge,
   ContraEntry,
   ContraEntryItem,
-  BillWiseOpening
+  BillWiseOpening,
+  CForm,
+  FForm,
+  HForm,
+  E1Form,
+  CFormPurchase
 };
