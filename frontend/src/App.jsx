@@ -23,6 +23,7 @@ import FForm from "./components/vouchers/f-form";
 import HForm from "./components/vouchers/h-form";
 import E1Form from "./components/vouchers/e1-form";
 import CFormPurchase from "./components/vouchers/c-formPurchase";
+import Provisions from "./components/vouchers/provisions";
 
 import { 
   getDB, 
@@ -497,11 +498,10 @@ export default function App() {
           {activeTab === "provisions-entry" && (
             <div className="flex-1 overflow-hidden flex flex-col" id="provisions-tab">
               <PageHeader category="Vouchers" title="Provisions, Notes & Allocations" description="Record year-end provisioning totals, debit notes, credit notes, and closing accounts." />
-              <JournalVoucher 
+              <Provisions 
                 database={db}
                 onSaveVoucher={handleSaveVoucher}
                 onDeleteVoucher={deleteVoucher}
-                onPrint={triggerPrintModal}
               />
             </div>
           )}

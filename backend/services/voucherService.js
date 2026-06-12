@@ -1,4 +1,4 @@
-import { Voucher, VoucherItem, AppRecord, ContraEntry, ContraEntryItem } from "../models/index.js";
+import { Voucher, VoucherItem, AppRecord, ContraEntry, ContraEntryItem, Provision, ProvisionItem } from "../models/index.js";
 
 const unwrapVoucher = (row) => {
   const plain = row.toJSON();
@@ -12,10 +12,11 @@ const unwrapVoucher = (row) => {
 export const getVoucherState = async () => {
   const regularVouchers = (await Voucher.findAll({ include: [{ model: VoucherItem, as: "items" }], order: [["updatedAt", "DESC"]] })).map(unwrapVoucher);
   const contraEntries = (await ContraEntry.findAll({ include: [{ model: ContraEntryItem, as: "items" }], order: [["updatedAt", "DESC"]] })).map(unwrapVoucher);
+  const provisions = (await Provision.findAll({ include: [{ model: ProvisionItem, as: "items" }], order: [["updatedAt", "DESC"]] })).map(unwrapVoucher);
 
   // Unified push payload keeps the frontend intact
   return {
-    vouchers: [...regularVouchers, ...contraEntries],
+    vouchers: [...regularVouchers, ...contraEntries, ...provisions],
     reverseBills: (await AppRecord.findAll({ where: { collection: "reverseBills" }, order: [["updatedAt", "DESC"]] })).map((row) => row.payload)
   };
 };
@@ -65,6 +66,29 @@ export const saveContraEntry = async (data) => {
 };
 
 export const deleteContraEntry = (id) => ContraEntry.destroy({ where: { id } });
+
+export const saveProvision = async (data) => {
+  const items = data.items || [];
+  const totalAmount = items.reduce((sum, item) => sum + (Number(item.debit) || 0), 0)
+    || items.reduce((sum, item) => sum + (Number(item.credit) || 0), 0);
+  const id = data.id || `PRV-${Date.now()}${Math.floor(Math.random() * 1000)}`;
+  const payload = { ...data, id, totalAmount };
+
+  await Provision.upsert({ ...payload, payload });
+  await ProvisionItem.destroy({ where: { provisionId: id } });
+  await ProvisionItem.bulkCreate(items.map((item) => ({
+    provisionId: id,
+    accountCode: item.accountCode,
+    debit: item.debit || 0,
+    credit: item.credit || 0,
+    narration: item.narration,
+    payload: item
+  })));
+
+  return payload;
+};
+
+export const deleteProvision = (id) => Provision.destroy({ where: { id } });
 
 export const saveReverseBill = async (data) => {
   const recordKey = data.id || `RB${Date.now()}`;

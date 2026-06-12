@@ -21,6 +21,8 @@ import defineFForm from "./FForm.js";
 import defineHForm from "./HForm.js";
 import defineE1Form from "./E1Form.js";
 import defineCFormPurchase from "./CFormPurchase.js";
+import defineProvision from "./Provision.js";
+import defineProvisionItem from "./ProvisionItem.js";
 
 const User = defineUser(sequelize);
 const Account = defineAccount(sequelize);
@@ -43,6 +45,8 @@ const FForm = defineFForm(sequelize);
 const HForm = defineHForm(sequelize);
 const E1Form = defineE1Form(sequelize);
 const CFormPurchase = defineCFormPurchase(sequelize);
+const Provision = defineProvision(sequelize);
+const ProvisionItem = defineProvisionItem(sequelize);
 
 const AppRecord = sequelize.define("AppRecord", {
   collection: { type: DataTypes.STRING, primaryKey: true },
@@ -54,6 +58,8 @@ Voucher.hasMany(VoucherItem, { foreignKey: "voucherId", sourceKey: "id", as: "it
 VoucherItem.belongsTo(Voucher, { foreignKey: "voucherId", targetKey: "id" });
 ContraEntry.hasMany(ContraEntryItem, { foreignKey: "contraEntryId", sourceKey: "id", as: "items", onDelete: "CASCADE" });
 ContraEntryItem.belongsTo(ContraEntry, { foreignKey: "contraEntryId", targetKey: "id" });
+Provision.hasMany(ProvisionItem, { foreignKey: "provisionId", sourceKey: "id", as: "items", onDelete: "CASCADE" });
+ProvisionItem.belongsTo(Provision, { foreignKey: "provisionId", targetKey: "id" });
 
 export {
   sequelize,
@@ -78,5 +84,7 @@ export {
   FForm,
   HForm,
   E1Form,
-  CFormPurchase
+  CFormPurchase,
+  Provision,
+  ProvisionItem
 };

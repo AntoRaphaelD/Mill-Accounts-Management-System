@@ -204,6 +204,8 @@ export function saveVoucher(v) {
   
   if (voucherData.type === "CONTRA") {
     apiCall("/api/contra-entries", "POST", voucherData);
+  } else if (voucherData.type === "PROVISION") {
+    apiCall("/api/provisions", "POST", voucherData);
   } else {
     apiCall("/api/vouchers", "POST", voucherData);
   }
@@ -218,6 +220,8 @@ export function deleteVoucher(id) {
     addAuditLog("VOUCHER DELETE", `Deleted ${v.type} Voucher No ${v.voucherNo}`);
     if (v.type === "CONTRA") {
       apiCall(`/api/contra-entries/${id}`, "DELETE");
+    } else if (v.type === "PROVISION") {
+      apiCall(`/api/provisions/${id}`, "DELETE");
     } else {
       apiCall(`/api/vouchers/${id}`, "DELETE");
     }

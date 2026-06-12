@@ -12,6 +12,7 @@ import reverseChargeRoutes from "./reverseCharge.routes.js";
 import billWiseOpeningRoutes from "./billWiseOpening.routes.js";
 import contraEntryRoutes from "./contraEntry.routes.js";
 import taxFormRoutes from "./taxForm.routes.js";
+import provisionRoutes from "./provision.routes.js";
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use("/reverse-charges", reverseChargeRoutes);
 router.use("/bill-wise-openings", billWiseOpeningRoutes);
 router.use("/contra-entries", contraEntryRoutes);
 router.use("/tax-forms", taxFormRoutes);
+router.use("/provisions", provisionRoutes);
 
 export default router;
