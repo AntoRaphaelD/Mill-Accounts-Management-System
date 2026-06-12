@@ -24,6 +24,8 @@ import HForm from "./components/vouchers/h-form";
 import E1Form from "./components/vouchers/e1-form";
 import CFormPurchase from "./components/vouchers/c-formPurchase";
 import Provisions from "./components/vouchers/provisions";
+import DebitNote from "./components/vouchers/DebitNote";
+import CreditNote from "./components/vouchers/CreditNote";
 
 import { 
   getDB, 
@@ -503,6 +505,22 @@ export default function App() {
                 onSaveVoucher={handleSaveVoucher}
                 onDeleteVoucher={deleteVoucher}
               />
+            </div>
+          )}
+
+          {/* TAB: DEBIT NOTE */}
+          {activeTab === "debit-note" && (
+            <div className="flex-1 overflow-hidden flex flex-col" id="dn-entry-tab">
+              <PageHeader category="Vouchers" title="Debit Note Register" description="Record Debit Notes for purchase returns and rate differences." />
+              <DebitNote database={db} onSaveVoucher={handleSaveVoucher} onDeleteVoucher={deleteVoucher} onPrint={triggerPrintModal} />
+            </div>
+          )}
+
+          {/* TAB: CREDIT NOTE */}
+          {activeTab === "credit-note" && (
+            <div className="flex-1 overflow-hidden flex flex-col" id="cn-entry-tab">
+              <PageHeader category="Vouchers" title="Credit Note Register" description="Record Credit Notes for sales returns and discount adjustments." />
+              <CreditNote database={db} onSaveVoucher={handleSaveVoucher} onDeleteVoucher={deleteVoucher} onPrint={triggerPrintModal} />
             </div>
           )}
 

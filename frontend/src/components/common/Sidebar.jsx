@@ -40,7 +40,9 @@ export default function Sidebar({ activeTab, setActiveTab, currentUser, setCurre
     { id: "contra-entry", label: "Contra Entry", icon: ListRestart, category: "Vouchers" },
     { id: "reverse-bill", label: "Reverse Bill Entry", icon: PlusCircle, category: "Vouchers" },
     { id: "voucher-find", label: "Voucher Find", icon: Search, category: "Vouchers" },
-    { id: "provisions-entry", label: "Provisions & Notes", icon: Briefcase, category: "Vouchers" },
+    { id: "provisions-entry", label: "Provisions Entry", icon: Briefcase, category: "Vouchers" },
+    { id: "debit-note", label: "Debit Note", icon: FileText, category: "Vouchers" },
+    { id: "credit-note", label: "Credit Note", icon: FileText, category: "Vouchers" },
 
     { id: "c-form", label: "C Form", icon: ClipboardList, category: "Tax Forms" },
     { id: "f-form", label: "F Form", icon: ClipboardList, category: "Tax Forms" },
