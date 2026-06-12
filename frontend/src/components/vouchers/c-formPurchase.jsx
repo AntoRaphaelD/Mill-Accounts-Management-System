@@ -5,9 +5,10 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [selectAll, setSelectAll] = useState(false);
   
   // Local state for the Bill Grid
-  const [billItems, setBillItems] = useState([{ id: Date.now(), billNo: "", billDate: "", bales: 0, kgs: 0, value: 0 }]);
+  const [billItems, setBillItems] = useState([{ id: Date.now(), billNo: "", billDate: "", bales: 0, kgs: 0, value: 0, selected: false }]);
 
   // 1. Debug Sync Logging
   useEffect(() => {
@@ -29,7 +30,7 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
   };
 
   const handleAddBillRow = () => {
-    setBillItems([...billItems, { id: Date.now(), billNo: "", billDate: "", bales: 0, kgs: 0, value: 0 }]);
+    setBillItems([...billItems, { id: Date.now(), billNo: "", billDate: "", bales: 0, kgs: 0, value: 0, selected: false }]);
   };
 
   const updateBillRow = (id, field, value) => {
@@ -41,6 +42,10 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
   const calculateTotal = () => {
     return billItems.reduce((sum, item) => sum + (parseFloat(item.value) || 0), 0);
   };
+  
+  const selectedTotal = billItems
+    .filter(it => it.selected)
+    .reduce((sum, item) => sum + (parseFloat(item.value) || 0), 0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,9 +59,11 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
         id: editingItem?.id || `CFP-${Date.now()}`,
         fromDate: data.fromDate,
         toDate: data.toDate,
-        sellerName: data.sellerName,
-        cFormNo: data.cFormNo,
+        buyerName: data.buyerName,
+        cFormNo1: data.cFormNo1,
+        cFormNo2: data.cFormNo2,
         issuedDate: data.issuedDate,
+        formAmount: parseFloat(data.formAmount) || 0,
         totalAmount: calculateTotal(),
         remarks: data.remarks,
         bills: billItems 
@@ -67,6 +74,7 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
       
       setIsModalOpen(false);
       setEditingItem(null);
+      setSelectAll(false);
     } catch (err) {
       console.error("❌ Save failed:", err.message);
     }
@@ -74,8 +82,9 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
   };
 
   const filteredData = dataList.filter(item => 
-    (item.sellerName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (item.cFormNo || "").toLowerCase().includes(searchTerm.toLowerCase())
+    (item.buyerName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.cFormNo1 || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.cFormNo2 || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -97,13 +106,13 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
           <div className="relative flex-1">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
             <input 
-              type="text" placeholder="Search Seller or Form No..." 
+              type="text" placeholder="Search Buyer or Form No..." 
               value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
               className="w-full md:w-64 pl-9 pr-4 py-2 border border-slate-200 rounded-md text-xs outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
             />
           </div>
           <button 
-            onClick={() => { setEditingItem(null); setBillItems([{ id: Date.now() }]); setIsModalOpen(true); }}
+            onClick={() => { setEditingItem(null); setBillItems([{ id: Date.now(), selected: false }]); setSelectAll(false); setIsModalOpen(true); }}
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-xs font-bold flex items-center gap-2 shadow-sm whitespace-nowrap"
           >
             <Plus className="w-4 h-4" /> Add Purchase C Form
@@ -117,8 +126,9 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-[#E2E8F0] text-[#64748B] font-bold uppercase tracking-wider">
-                <th className="p-4">Seller Details</th>
+                <th className="p-4">Buyer's Name</th>
                 <th className="p-4">C-Form No</th>
+                <th className="p-4 text-right">C-Form Amount</th>
                 <th className="p-4">Period</th>
                 <th className="p-4 text-right">Total Purchase Value</th>
                 <th className="p-4 text-center w-24">Actions</th>
@@ -128,10 +138,13 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
               {filteredData.map(item => (
                 <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                   <td className="p-4">
-                    <div className="font-bold text-slate-800">{item.sellerName}</div>
+                    <div className="font-bold text-slate-800">{item.buyerName}</div>
                     <div className="text-[9px] text-slate-400 uppercase font-bold tracking-tight">Issued: {item.issuedDate || '-'}</div>
                   </td>
-                  <td className="p-4 font-mono font-bold text-emerald-600 bg-emerald-50/30">{item.cFormNo}</td>
+                  <td className="p-4 font-mono font-bold text-emerald-600 bg-emerald-50/30">{item.cFormNo1} {item.cFormNo2}</td>
+                  <td className="p-4 text-right font-mono font-bold text-slate-700">
+                    {parseFloat(item.formAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </td>
                   <td className="p-4 text-slate-500 font-mono text-[10px]">
                     {item.fromDate} <span className="mx-1">→</span> {item.toDate}
                   </td>
@@ -168,33 +181,49 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
             
             <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50">
               <form id="cfp-form" onSubmit={handleSubmit}>
-                <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">From Date</label>
-                      <input name="fromDate" type="date" required defaultValue={editingItem?.fromDate || ""} className="w-full p-2 border rounded text-xs font-mono" />
+                {/* Vertically Stacked Header Data */}
+                <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex flex-col gap-4">
+                    
+                    <div className="grid grid-cols-2 gap-x-12 gap-y-4">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">From Date</label>
+                        <input name="fromDate" type="date" required defaultValue={editingItem?.fromDate || ""} className="w-40 p-2 border rounded text-xs font-mono outline-none focus:border-emerald-500" />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">To Date</label>
+                        <input name="toDate" type="date" required defaultValue={editingItem?.toDate || ""} className="w-40 p-2 border rounded text-xs font-mono outline-none focus:border-emerald-500" />
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">To Date</label>
-                      <input name="toDate" type="date" required defaultValue={editingItem?.toDate || ""} className="w-full p-2 border rounded text-xs font-mono" />
-                    </div>
-                    <div className="space-y-1 md:col-span-2">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">Seller Name</label>
-                      <select name="sellerName" required defaultValue={editingItem?.sellerName || ""} className="w-full p-2 border rounded text-xs font-bold">
-                        <option value="">-- Select Seller Account --</option>
+
+                    <div className="flex flex-col">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase mb-1">Buyer's Name</label>
+                      <select name="buyerName" required defaultValue={editingItem?.buyerName || ""} className="w-full p-2 border rounded text-xs font-bold outline-none focus:border-emerald-500">
+                        <option value="">-- Select Account --</option>
                         {accounts.map(a => <option key={a.code} value={a.name}>{a.name}</option>)}
                       </select>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">C-FORM No.</label>
-                      <input name="cFormNo" required defaultValue={editingItem?.cFormNo || ""} className="w-full p-2 border rounded text-xs font-mono font-bold text-emerald-600 uppercase" placeholder="P-CF-000" />
+
+                    <div className="flex flex-col w-1/2 min-w-[250px]">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase mb-1">C FORM No.</label>
+                      <div className="flex gap-2">
+                        <input name="cFormNo1" required defaultValue={editingItem?.cFormNo1 || ""} className="w-1/2 p-2 border rounded text-xs font-mono font-bold text-emerald-600 outline-none focus:border-emerald-500" />
+                        <input name="cFormNo2" defaultValue={editingItem?.cFormNo2 || ""} className="w-1/2 p-2 border rounded text-xs font-mono font-bold text-emerald-600 outline-none focus:border-emerald-500" />
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">Issued Date</label>
-                      <input name="issuedDate" type="date" defaultValue={editingItem?.issuedDate || ""} className="w-full p-2 border rounded text-xs font-mono" />
+
+                    <div className="flex flex-col w-1/3 min-w-[200px]">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase mb-1">Issued Date</label>
+                      <input name="issuedDate" type="date" defaultValue={editingItem?.issuedDate || ""} className="w-full p-2 border rounded text-xs font-mono outline-none focus:border-emerald-500" />
                     </div>
-                    <div className="md:col-span-2 space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">Remarks</label>
-                      <input name="remarks" defaultValue={editingItem?.remarks || ""} className="w-full p-2 border rounded text-xs" />
+
+                    <div className="flex flex-col w-1/3 min-w-[200px]">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase mb-1">C FORM Amount</label>
+                      <input name="formAmount" type="number" step="any" defaultValue={editingItem?.formAmount || ""} className="w-full p-2 border rounded text-xs font-mono font-bold text-emerald-700 bg-emerald-50/30 outline-none focus:border-emerald-500" placeholder="0.00" />
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase mb-1">Remarks</label>
+                      <input name="remarks" defaultValue={editingItem?.remarks || ""} className="w-full p-2 border rounded text-xs outline-none focus:border-emerald-500" />
                     </div>
                 </div>
 
@@ -210,7 +239,12 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
                   <table className="w-full text-left text-[11px]">
                     <thead className="bg-slate-50 border-b text-slate-500 font-bold uppercase tracking-tighter">
                       <tr>
-                        <th className="p-2 w-8">#</th>
+                        <th className="p-2 w-8 text-center">
+                          <input type="checkbox" checked={selectAll} onChange={e => {
+                            setSelectAll(e.target.checked);
+                            setBillItems(billItems.map(it => ({...it, selected: e.target.checked})));
+                          }} />
+                        </th>
                         <th className="p-2">Bill No.</th>
                         <th className="p-2">Bill Date</th>
                         <th className="p-2 text-right">Bales</th>
@@ -222,7 +256,9 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
                     <tbody className="divide-y divide-slate-100">
                       {billItems.map((it, idx) => (
                         <tr key={it.id} className="group">
-                          <td className="p-2 text-slate-400 text-center font-mono">{idx + 1}</td>
+                          <td className="p-2 text-center">
+                            <input type="checkbox" checked={!!it.selected} onChange={e => updateBillRow(it.id, 'selected', e.target.checked)} />
+                          </td>
                           <td className="p-1"><input value={it.billNo} onChange={e => updateBillRow(it.id, 'billNo', e.target.value)} className="w-full p-1.5 border border-transparent group-hover:border-slate-200 rounded text-xs font-bold" /></td>
                           <td className="p-1"><input type="date" value={it.billDate} onChange={e => updateBillRow(it.id, 'billDate', e.target.value)} className="w-full p-1.5 border border-transparent group-hover:border-slate-200 rounded text-xs font-mono" /></td>
                           <td className="p-1"><input type="number" value={it.bales} onChange={e => updateBillRow(it.id, 'bales', e.target.value)} className="w-full p-1.5 border border-transparent group-hover:border-slate-200 rounded text-right font-mono" /></td>
@@ -237,10 +273,20 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
                       ))}
                     </tbody>
                   </table>
-                  <div className="p-4 bg-slate-50 flex justify-end">
-                    <div className="text-right">
-                      <div className="text-[9px] uppercase font-bold text-slate-400">Consolidated Value</div>
-                      <div className="text-xl font-mono font-black text-slate-800">₹ {calculateTotal().toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                  <div className="p-4 bg-slate-50 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" checked={selectAll} readOnly className="w-4 h-4 text-emerald-600" />
+                      <span className="text-[10px] font-bold text-slate-700 uppercase">Select all</span>
+                    </div>
+                    <div className="flex items-center gap-8">
+                      <div className="text-right">
+                        <div className="text-[9px] uppercase font-bold text-slate-400">Selected Inv. Total</div>
+                        <div className="text-sm font-mono font-bold text-slate-600">₹ {selectedTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[9px] uppercase font-bold text-slate-400">Total</div>
+                        <div className="text-xl font-mono font-black text-slate-800">₹ {calculateTotal().toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -248,10 +294,10 @@ export default function CFormPurchase({ database, onSave, onDelete }) {
             </div>
             
             <div className="p-4 border-t bg-white flex justify-end gap-3 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-              <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-xs font-bold text-slate-500 hover:text-slate-800">Cancel</button>
               <button type="submit" form="cfp-form" className="px-8 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-bold shadow-lg shadow-emerald-100 transition-all">
-                Save Purchase Record
+                Save
               </button>
+              <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors">Cancel</button>
             </div>
 
           </div>
