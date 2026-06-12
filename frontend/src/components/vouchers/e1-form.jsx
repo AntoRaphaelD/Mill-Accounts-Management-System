@@ -8,6 +8,8 @@ export default function E1FormMaster({ database, onSave, onDelete }) {
   
   // Local state for filtered C-Forms based on selected Buyer
   const [selectedBuyer, setSelectedBuyer] = useState("");
+  const [selectedCFormNo, setSelectedCFormNo] = useState("");
+  const [cFormAmount, setCFormAmount] = useState("");
 
   // 1. Debug Sync Logging
   useEffect(() => {
@@ -22,8 +24,22 @@ export default function E1FormMaster({ database, onSave, onDelete }) {
   const accounts = database?.accounts || [];
   const cForms = database?.cForms || [];
 
-  // Filter C-Forms that belong to the currently selected buyer in the modal
-  const availableCForms = cForms.filter(cf => cf.buyerName === selectedBuyer);
+  // Filter to show ONLY C-Forms that had "E1 Form Issued" checked,
+  // and optionally scope them to the currently selected Buyer.
+  const availableCForms = cForms.filter(cf => cf.isE1Form === true && (!selectedBuyer || cf.buyerName === selectedBuyer));
+
+  const handleCFormChange = (e) => {
+    const val = e.target.value;
+    setSelectedCFormNo(val);
+    
+    // Auto-fetch and populate the corresponding C Form amount
+    const matched = availableCForms.find(cf => cf.cFormNo === val);
+    if (matched) {
+      setCFormAmount(matched.formAmount || matched.totalAmount || 0);
+    } else {
+      setCFormAmount("");
+    }
+  };
 
   const handleDelete = (id) => {
     console.warn(`🗑️ Deleting E1-Form ID: ${id}`);
@@ -61,6 +77,8 @@ export default function E1FormMaster({ database, onSave, onDelete }) {
       setIsModalOpen(false);
       setEditingItem(null);
       setSelectedBuyer("");
+      setSelectedCFormNo("");
+      setCFormAmount("");
     } catch (err) {
       console.error("❌ Save failed:", err.message);
     }
@@ -97,7 +115,7 @@ export default function E1FormMaster({ database, onSave, onDelete }) {
             />
           </div>
           <button 
-            onClick={() => { setEditingItem(null); setSelectedBuyer(""); setIsModalOpen(true); }}
+            onClick={() => { setEditingItem(null); setSelectedBuyer(""); setSelectedCFormNo(""); setCFormAmount(""); setIsModalOpen(true); }}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-xs font-bold flex items-center gap-2 shadow-sm transition-all whitespace-nowrap"
           >
             <Plus className="w-4 h-4" /> Add E1 Form
@@ -137,7 +155,7 @@ export default function E1FormMaster({ database, onSave, onDelete }) {
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-center gap-1">
-                      <button onClick={() => { setEditingItem(item); setSelectedBuyer(item.buyerName); setIsModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all"><Edit2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => { setEditingItem(item); setSelectedBuyer(item.buyerName || ""); setSelectedCFormNo(item.linkedCFormNo || ""); setCFormAmount(item.cFormAmount || ""); setIsModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all"><Edit2 className="w-3.5 h-3.5" /></button>
                       <button onClick={() => handleDelete(item.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </td>
@@ -164,83 +182,101 @@ export default function E1FormMaster({ database, onSave, onDelete }) {
             </div>
             
             <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-slate-50/50">
-              <form id="e1-form" onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <form id="e1-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
                 
-                {/* Period Section */}
-                <div className="bg-white p-4 border border-slate-200 rounded-xl shadow-sm space-y-3">
-                    <div className="space-y-1">
+                {/* 1. Date Section (Top) */}
+                <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-sm grid grid-cols-2 gap-x-12 gap-y-4">
+                    <div className="flex items-center justify-between">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">From Date</label>
-                      <input name="fromDate" type="date" required defaultValue={editingItem?.fromDate || ""} className="w-full p-2 border rounded text-xs font-mono" />
+                      <input name="fromDate" type="date" required defaultValue={editingItem?.fromDate || ""} className="w-40 p-2 border rounded text-xs font-mono outline-none focus:border-indigo-500" />
                     </div>
-                    <div className="space-y-1">
+                    <div className="flex items-center justify-between">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">To Date</label>
-                      <input name="toDate" type="date" required defaultValue={editingItem?.toDate || ""} className="w-full p-2 border rounded text-xs font-mono" />
+                      <input name="toDate" type="date" required defaultValue={editingItem?.toDate || ""} className="w-40 p-2 border rounded text-xs font-mono outline-none focus:border-indigo-500" />
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase text-indigo-600">Issued Date</label>
-                      <input name="issuedDate" type="date" required defaultValue={editingItem?.issuedDate || ""} className="w-full p-2 border rounded text-xs font-mono" />
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Issued Date</label>
+                      <input name="issuedDate" type="date" required defaultValue={editingItem?.issuedDate || ""} className="w-40 p-2 border rounded text-xs font-mono outline-none focus:border-indigo-500" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Entry Date</label>
+                      <input name="entryDate" type="date" required defaultValue={editingItem?.entryDate || ""} className="w-40 p-2 border rounded text-xs font-mono outline-none focus:border-indigo-500" />
                     </div>
                 </div>
 
-                {/* Buyer & Linked C-Form Section */}
-                <div className="bg-white p-4 border border-slate-200 rounded-xl shadow-sm space-y-3">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">Buyer Name</label>
+                {/* 2. Form Details Section (Middle) */}
+                <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex flex-col gap-4">
+                    <div className="flex flex-col">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase mb-1">Buyer's Name</label>
                       <select 
                         name="buyerName" 
                         required 
                         value={selectedBuyer}
                         onChange={(e) => setSelectedBuyer(e.target.value)} 
-                        className="w-full p-2 border rounded text-xs font-bold"
+                        className="w-full p-2 border rounded text-xs font-bold outline-none focus:border-indigo-500"
                       >
                         <option value="">-- Select Buyer --</option>
                         {accounts.map(a => <option key={a.code} value={a.name}>{a.name}</option>)}
                       </select>
                     </div>
-                    <div className="space-y-1">
+
+                    <div className="flex flex-col w-1/3 min-w-[200px]">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">Linked C-Form No.</label>
-                      <select name="linkedCFormNo" required defaultValue={editingItem?.linkedCFormNo || ""} className="w-full p-2 border rounded text-xs font-mono text-blue-600 bg-blue-50/20">
+                      <select 
+                        name="linkedCFormNo" 
+                        required 
+                        value={selectedCFormNo}
+                        onChange={handleCFormChange}
+                        className="w-full p-2 border rounded text-xs font-mono text-blue-600 bg-blue-50/20 outline-none focus:border-indigo-500"
+                      >
                         <option value="">-- Select Form --</option>
                         {availableCForms.map(cf => <option key={cf.id} value={cf.cFormNo}>{cf.cFormNo}</option>)}
                       </select>
                     </div>
-                    <div className="space-y-1">
+
+                    <div className="flex flex-col w-1/3 min-w-[200px]">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">C-Form Amount</label>
-                      <input name="cFormAmount" type="number" step="any" defaultValue={editingItem?.cFormAmount || 0} className="w-full p-2 border rounded text-xs font-mono font-bold" />
+                      <input 
+                        name="cFormAmount" 
+                        type="number" 
+                        step="any" 
+                        value={cFormAmount}
+                        onChange={(e) => setCFormAmount(e.target.value)}
+                        className="w-full p-2 border rounded text-xs font-mono font-bold outline-none focus:border-indigo-500" 
+                      />
                     </div>
-                </div>
 
-                {/* E1 Details Section */}
-                <div className="bg-white p-4 border border-slate-200 rounded-xl shadow-sm space-y-3">
-                    <div className="space-y-1">
+                    <div className="flex flex-col">
                       <label className="text-[10px] font-bold text-slate-500 uppercase text-indigo-600 font-black">E1 FORM No.</label>
-                      <input name="e1FormNo" required defaultValue={editingItem?.e1FormNo || ""} className="w-full p-2 border border-indigo-200 rounded text-xs font-mono font-bold uppercase" placeholder="E1-0000" />
+                      <input name="e1FormNo" required defaultValue={editingItem?.e1FormNo || ""} className="w-full p-2 border border-indigo-200 rounded text-xs font-mono font-bold uppercase outline-none focus:border-indigo-500" placeholder="E1-0000" />
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">Agent's Name</label>
-                      <input name="agentName" defaultValue={editingItem?.agentName || ""} className="w-full p-2 border rounded text-xs" placeholder="e.g. South Agency" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-500 uppercase">Tin No.</label>
-                      <input name="tinNo" defaultValue={editingItem?.tinNo || ""} className="w-full p-2 border rounded text-xs font-mono" />
-                    </div>
-                </div>
 
-                <div className="md:col-span-3 space-y-1 bg-white p-4 border border-slate-200 rounded-xl shadow-sm">
-                  <label className="text-[10px] font-bold text-slate-500 uppercase">General Remarks</label>
-                  <input name="remarks" defaultValue={editingItem?.remarks || ""} className="w-full p-2 border rounded text-xs" placeholder="Enter any internal notes or issuance memo..." />
+                    <div className="flex flex-col">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Agent's Name</label>
+                      <input name="agentName" defaultValue={editingItem?.agentName || ""} className="w-full p-2 border rounded text-xs outline-none focus:border-indigo-500" placeholder="e.g. South Agency" />
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Tin No.</label>
+                      <input name="tinNo" defaultValue={editingItem?.tinNo || ""} className="w-full p-2 border rounded text-xs font-mono outline-none focus:border-indigo-500" />
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">Remarks</label>
+                      <input name="remarks" defaultValue={editingItem?.remarks || ""} className="w-full p-2 border rounded text-xs outline-none focus:border-indigo-500" placeholder="Enter any internal notes or issuance memo..." />
+                    </div>
                 </div>
               </form>
             </div>
             
             <div className="p-4 border-t bg-white flex justify-end gap-3 shrink-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
               <button type="button" className="px-5 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded flex items-center gap-2 mr-auto border border-slate-200">
-                <FileText className="w-4 h-4" /> Issue Report
+                <FileText className="w-4 h-4" /> Report
+              </button>
+              <button type="submit" form="e1-form" className="px-10 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold shadow-lg shadow-indigo-100 transition-all">
+                Save
               </button>
               <button type="button" onClick={() => setIsModalOpen(false)} className="px-5 py-2 text-xs font-bold text-slate-500 hover:text-slate-800 transition-colors">Cancel</button>
-              <button type="submit" form="e1-form" className="px-10 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-bold shadow-lg shadow-indigo-100 transition-all">
-                {editingItem ? "Update Register" : "Save E1 Form"}
-              </button>
             </div>
 
           </div>
