@@ -1,4 +1,4 @@
-import { Account, AppRecord, Group, ServiceTaxMaster, SubGroup, TDSMaster, PLSetting, BSMainGroup, BSGroup, ReverseCharge } from "../models/index.js";
+import { Account, AppRecord, Group, ServiceTaxMaster, SubGroup, TDSMaster, PLSetting, BSMainGroup, BSGroup, ReverseCharge, BillWiseOpening } from "../models/index.js";
 
 const unwrap = (row) => {
   const plain = row.toJSON();
@@ -52,7 +52,7 @@ export const getMastersState = async () => ({
   bsMainGroups: (await BSMainGroup.findAll()).map(unwrap),
   bsGroups: (await BSGroup.findAll()).map(unwrap),
   reverseTypes: (await ReverseCharge.findAll()).map(unwrap),
-  billWiseOpenings: await listAppRecords("billWiseOpenings"),
+  billWiseOpenings: (await BillWiseOpening.findAll()).map(unwrap),
   closingStock: await listAppRecords("closingStock")
 });
 
@@ -96,7 +96,7 @@ export const saveServiceTax = async (data) => {
   return { ...plain.payload, ...plain };
 };
 export const deleteServiceTax = (code) => destroyByKey(ServiceTaxMaster, "code", code);
-export const saveBillWiseOpening = (data) => upsertAppRecord("billWiseOpenings", "id", data, "BWO");
-export const deleteBillWiseOpening = (id) => deleteAppRecord("billWiseOpenings", id);
+export const saveBillWiseOpening = (data) => upsertByKey(BillWiseOpening, "id", data, "BWO");
+export const deleteBillWiseOpening = (id) => destroyByKey(BillWiseOpening, "id", id);
 export const saveClosingStock = (data) => upsertAppRecord("closingStock", "id", data, "CS");
 export const deleteClosingStock = (id) => deleteAppRecord("closingStock", id);

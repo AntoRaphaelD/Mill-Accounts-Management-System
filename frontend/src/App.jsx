@@ -15,6 +15,7 @@ import JournalVoucher from "./components/vouchers/JournalVoucher";
 import CashPayment from "./components/vouchers/CashPayment";
 import ReverseBillEntry from "./components/vouchers/ReverseBillEntry";
 import GeneralLedger from "./components/reports/GeneralLedger";
+import ContraEntry from "./components/vouchers/ContraEntry";
 import BankPayment from './components/vouchers/BankPayment';
 
 import { 
@@ -447,12 +448,10 @@ export default function App() {
           {activeTab === "contra-entry" && (
             <div className="flex-1 overflow-hidden flex flex-col" id="contra-entry-tab">
               <PageHeader category="Vouchers" title="Contra Bank / Cash Transfers" description="Record liquid inter-account movements between vault drawers and active bank limit accounts." />
-              <CashPayment
+              <ContraEntry
                 database={db}
-                mode="CONTRA"
                 onSaveVoucher={handleSaveVoucher}
                 onDeleteVoucher={deleteVoucher}
-                onPrint={triggerPrintModal}
               />
             </div>
           )}

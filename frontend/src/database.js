@@ -201,7 +201,13 @@ export function saveVoucher(v) {
     dbState.vouchers.unshift(voucherData);
     addAuditLog("VOUCHER ADD", `Added ${v.type} Voucher No ${v.voucherNo}`);
   }
-  apiCall("/api/vouchers", "POST", voucherData);
+  
+  if (voucherData.type === "CONTRA") {
+    apiCall("/api/contra-entries", "POST", voucherData);
+  } else {
+    apiCall("/api/vouchers", "POST", voucherData);
+  }
+  
   notifyDB();
   return voucherData;
 }
@@ -210,8 +216,15 @@ export function deleteVoucher(id) {
   dbState.vouchers = dbState.vouchers.filter(item => item.id !== id);
   if (v) {
     addAuditLog("VOUCHER DELETE", `Deleted ${v.type} Voucher No ${v.voucherNo}`);
+    if (v.type === "CONTRA") {
+      apiCall(`/api/contra-entries/${id}`, "DELETE");
+    } else {
+      apiCall(`/api/vouchers/${id}`, "DELETE");
+    }
+  } else {
+    // Fallback if not found locally
+    apiCall(`/api/vouchers/${id}`, "DELETE");
   }
-  apiCall(`/api/vouchers/${id}`, "DELETE");
   notifyDB();
 }
 

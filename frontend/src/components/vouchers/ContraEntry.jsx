@@ -54,9 +54,9 @@ export default function ContraEntry({ database, onSaveVoucher, onDeleteVoucher }
   const [chequeName, setChequeName] = useState("");
 
   const [tdsAmount, setTdsAmount] = useState(0);
-  const [sTaxAmount, setSTaxAmount] = useState(0);
+  const [serviceTaxAmount, setServiceTaxAmount] = useState(0);
   
-  const [bankOption, setBankOption] = useState("");
+  const [selectedBank, setSelectedBank] = useState("");
   const [acPay, setAcPay] = useState(false);
 
   // Line items for target debit heads
@@ -97,7 +97,9 @@ export default function ContraEntry({ database, onSaveVoucher, onDeleteVoucher }
     setNarration(v.narration || "SELF");
     setChequeName(v.chequeName || "** CASH - MILL **");
     setTdsAmount(v.tdsAmount || 0);
-    setSTaxAmount(v.sTaxAmount || 0);
+    setServiceTaxAmount(v.serviceTaxAmount || v.sTaxAmount || 0);
+    setSelectedBank(v.selectedBank || v.bankOption || "");
+    setAcPay(v.acPay || false);
 
     if (v.items && v.items.length) {
       const displayLines = v.items
@@ -128,7 +130,9 @@ export default function ContraEntry({ database, onSaveVoucher, onDeleteVoucher }
     setNarration("");
     setChequeName("");
     setTdsAmount(0);
-    setSTaxAmount(0);
+    setServiceTaxAmount(0);
+    setSelectedBank("");
+    setAcPay(false);
     setItems([{ id: "L1", accountCode: "", accountName: "", debit: 0 }]);
   };
 
@@ -263,7 +267,7 @@ export default function ContraEntry({ database, onSaveVoucher, onDeleteVoucher }
   const handleSave = () => {
     if(!voucherNo) return alert("Please specify a valid voucher number");
     
-    const validLines = items.filter(it => it.accountCode && it.debit > 0);
+    const validLines = items.filter(it => (it.accountCode || it.accountName) && it.debit > 0);
     if(validLines.length === 0) return alert("Please enter at least one transaction row with a positive debit amount.");
 
     const doubleEntryLines = [];
@@ -302,7 +306,9 @@ export default function ContraEntry({ database, onSaveVoucher, onDeleteVoucher }
       chequeName,
       narration: narration || validLines[0]?.narration || "",
       tdsAmount,
-      sTaxAmount,
+      serviceTaxAmount,
+      selectedBank,
+      acPay,
       items: doubleEntryLines,
       totalAmount
     };
@@ -411,10 +417,19 @@ export default function ContraEntry({ database, onSaveVoucher, onDeleteVoucher }
                   {items.map((item) => (
                     <tr key={item.id}>
                       <td className="p-1.5">
+                        {/* 
                         <select value={item.accountCode} onChange={(e) => updateLine(item.id, "accountCode", e.target.value)} className="w-full p-2 border rounded font-mono outline-none">
                           <option value="">-- Select Counter Account --</option>
                           {database.accounts.map(acc => (<option key={acc.code} value={acc.code}>{acc.name}</option>))}
                         </select>
+                        */}
+                        <input
+                          type="text"
+                          value={item.accountName || ""}
+                          onChange={(e) => updateLine(item.id, "accountName", e.target.value)}
+                          placeholder="Enter description..."
+                          className="w-full p-2 border rounded font-mono outline-none"
+                        />
                       </td>
                       <td className="p-1.5"><input type="number" value={item.debit || ""} onChange={(e) => updateLine(item.id, "debit", parseFloat(e.target.value) || 0)} className="w-full p-2 border rounded font-mono text-right outline-none" /></td>
                       <td className="p-1.5 text-center"><button onClick={() => removeLine(item.id)} className="text-slate-400 hover:text-red-500"><Trash className="w-4 h-4" /></button></td>
@@ -428,7 +443,7 @@ export default function ContraEntry({ database, onSaveVoucher, onDeleteVoucher }
             {/* Tax & Total */}
             <div className="grid grid-cols-3 gap-4 text-xs mt-2 border-t border-[#E2E8F0] pt-4">
               <div className="flex flex-col"><label className="text-[10px] uppercase font-bold text-[#64748B] mb-1">TDS Amount</label><input type="number" value={tdsAmount} onChange={(e) => setTdsAmount(parseFloat(e.target.value) || 0)} className="p-2 border border-[#E2E8F0] rounded font-mono" /></div>
-              <div className="flex flex-col"><label className="text-[10px] uppercase font-bold text-[#64748B] mb-1 text-center">Service Tax Amount</label><input type="number" value={sTaxAmount} onChange={(e) => setSTaxAmount(parseFloat(e.target.value) || 0)} className="p-2 border border-[#E2E8F0] rounded font-mono text-center" /></div>
+              <div className="flex flex-col"><label className="text-[10px] uppercase font-bold text-[#64748B] mb-1 text-center">S.Tax Amount</label><input type="number" value={serviceTaxAmount} onChange={(e) => setServiceTaxAmount(parseFloat(e.target.value) || 0)} className="p-2 border border-[#E2E8F0] rounded font-mono text-center" /></div>
               <div className="flex flex-col"><label className="text-[10px] uppercase font-bold text-[#64748B] mb-1 text-right">Total</label><input type="number" value={totalAmount} readOnly className="p-2 border border-[#E2E8F0] bg-slate-50 rounded font-mono text-right font-bold" /></div>
             </div>
 
@@ -440,9 +455,9 @@ export default function ContraEntry({ database, onSaveVoucher, onDeleteVoucher }
             </div>
 
             <div className="flex items-center gap-4 mt-2">
-              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer"><input type="radio" name="bankOpt" value="BOB" checked={bankOption === "BOB"} onChange={(e) => setBankOption(e.target.value)} className="accent-blue-600" /> B.O.B</label>
-              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer"><input type="radio" name="bankOpt" value="TMB" checked={bankOption === "TMB"} onChange={(e) => setBankOption(e.target.value)} className="accent-blue-600" /> T.M.B</label>
-              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer"><input type="radio" name="bankOpt" value="BOI" checked={bankOption === "BOI"} onChange={(e) => setBankOption(e.target.value)} className="accent-blue-600" /> B.O.I</label>
+              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer"><input type="radio" name="selectedBank" value="BOB" checked={selectedBank === "BOB"} onChange={(e) => setSelectedBank(e.target.value)} className="accent-blue-600" /> B.O.B</label>
+              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer"><input type="radio" name="selectedBank" value="TMB" checked={selectedBank === "TMB"} onChange={(e) => setSelectedBank(e.target.value)} className="accent-blue-600" /> T.M.B</label>
+              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer"><input type="radio" name="selectedBank" value="BOI" checked={selectedBank === "BOI"} onChange={(e) => setSelectedBank(e.target.value)} className="accent-blue-600" /> B.O.I</label>
             </div>
             
             <div className="flex items-center gap-4 mt-2">
@@ -453,14 +468,12 @@ export default function ContraEntry({ database, onSaveVoucher, onDeleteVoucher }
           </div>
           
           {/* Footer Actions */}
-          <div className="px-6 py-4 border-t border-[#E2E8F0] bg-slate-50 rounded-b-lg flex justify-between items-center mt-2">
-            <div className="flex gap-2">
-              <button onClick={() => voucherId ? handlePrintVoucher(database.vouchers.find(v => v.id === voucherId)) : alert("Please save first.")} className="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 px-6 py-2 rounded text-xs font-bold transition-colors flex items-center gap-1"><FileText className="w-3.5 h-3.5" /> Report</button>
-              <button className="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 px-6 py-2 rounded text-xs font-bold transition-colors flex items-center gap-1"><Printer className="w-3.5 h-3.5"/> Pay Advice</button>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded text-xs font-bold shadow-sm transition-colors">Update</button>
-              <button onClick={() => setIsModalOpen(false)} className="bg-white border border-[#E2E8F0] hover:bg-slate-50 text-slate-600 px-6 py-2 rounded text-xs font-bold transition-colors">Cancel</button>
+          <div className="px-6 py-4 border-t border-[#E2E8F0] bg-slate-50 rounded-b-lg flex justify-end mt-2">
+            <div className="grid grid-cols-2 gap-2 w-64">
+              <button type="button" onClick={() => voucherId ? handlePrintVoucher(database.vouchers.find(v => v.id === voucherId)) : alert("Please save first.")} className="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 py-2 rounded text-xs font-bold transition-colors text-center">Report</button>
+              <button type="button" className="bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 py-2 rounded text-xs font-bold transition-colors text-center">Pay.Advice</button>
+              <button type="button" onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-xs font-bold shadow-sm transition-colors text-center">Update</button>
+              <button type="button" onClick={() => setIsModalOpen(false)} className="bg-white border border-[#E2E8F0] hover:bg-slate-50 text-slate-600 py-2 rounded text-xs font-bold transition-colors text-center">Cancel</button>
             </div>
           </div>
         </div>

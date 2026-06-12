@@ -9,6 +9,8 @@ import plSettingsRoutes from "./plSettings.routes.js";
 import bsMainGroupRoutes from "./bsMainGroup.routes.js";
 import bsGroupRoutes from "./bsGroup.routes.js";
 import reverseChargeRoutes from "./reverseCharge.routes.js";
+import billWiseOpeningRoutes from "./billWiseOpening.routes.js";
+import contraEntryRoutes from "./contraEntry.routes.js";
 
 const router = Router();
 
@@ -22,5 +24,7 @@ router.use("/plsettings", plSettingsRoutes);
 router.use("/bsmaingroups", bsMainGroupRoutes);
 router.use("/bsgroups", bsGroupRoutes);
 router.use("/reverse-charges", reverseChargeRoutes);
+router.use("/bill-wise-openings", billWiseOpeningRoutes);
+router.use("/contra-entries", contraEntryRoutes);
 
 export default router;
