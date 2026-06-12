@@ -17,6 +17,7 @@ import ReverseBillEntry from "./components/vouchers/ReverseBillEntry";
 import GeneralLedger from "./components/reports/GeneralLedger";
 import ContraEntry from "./components/vouchers/ContraEntry";
 import BankPayment from './components/vouchers/BankPayment';
+import VoucherFind from "./components/vouchers/VoucherFind";
 
 import { 
   getDB, 
@@ -466,6 +467,14 @@ export default function App() {
                 onDeleteReverseBill={deleteVoucher}
                 onPrint={triggerPrintModal}
               />
+            </div>
+          )}
+
+          {/* TAB: VOUCHER FIND */}
+          {activeTab === "voucher-find" && (
+            <div className="flex-1 overflow-hidden flex flex-col" id="voucher-find-tab">
+              <PageHeader category="Vouchers" title="Find Vouchers" description="Search and locate specific vouchers through detailed criteria filters." />
+              <VoucherFind database={db} />
             </div>
           )}
 

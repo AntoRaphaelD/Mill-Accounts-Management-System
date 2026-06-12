@@ -12,7 +12,8 @@ import {
   FileCheck,
   Percent,
   ListRestart,
-  CreditCard
+  CreditCard,
+  Search
 } from "lucide-react";
 
 export default function Sidebar({ activeTab, setActiveTab, currentUser, setCurrentUser }) {
@@ -37,6 +38,7 @@ export default function Sidebar({ activeTab, setActiveTab, currentUser, setCurre
     { id: "cash-receipt", label: "Cash & Bank Receipt", icon: FileCheck, category: "Vouchers" },
     { id: "contra-entry", label: "Contra Entry", icon: ListRestart, category: "Vouchers" },
     { id: "reverse-bill", label: "Reverse Bill Entry", icon: PlusCircle, category: "Vouchers" },
+    { id: "voucher-find", label: "Voucher Find", icon: Search, category: "Vouchers" },
     { id: "provisions-entry", label: "Provisions & Notes", icon: Briefcase, category: "Vouchers" },
 
     { id: "general-ledger", label: "General Ledger", icon: TrendingUp, category: "Reports" },
