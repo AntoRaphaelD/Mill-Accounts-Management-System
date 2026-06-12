@@ -16,13 +16,13 @@ export default function JournalVoucher({ database, onSaveVoucher, onDeleteVouche
   const [tdsEnabled, setTdsEnabled] = useState(false);
   const [stEnabled, setStEnabled] = useState(false);
   const [seTaxEnabled, setSeTaxEnabled] = useState(false);
-  const [tdsAmount, setTdsAmount] = useState(0);
-  const [sTaxAmount, setSTaxAmount] = useState(0);
+  const [tdsAmount, setTdsAmount] = useState("");
+  const [sTaxAmount, setSTaxAmount] = useState("");
   const [mainGroup, setMainGroup] = useState("");
   const [subGroup, setSubGroup] = useState("");
 
   const [items, setItems] = useState([
-    { id: "L1", accountCode: "", accountName: "", narration: "", debit: 0, credit: 0 }
+    { id: "L1", accountCode: "", accountName: "", narration: "", debit: "", credit: "" }
   ]);
 
   // Load vouchers from state
@@ -63,11 +63,15 @@ export default function JournalVoucher({ database, onSaveVoucher, onDeleteVouche
     setTdsEnabled(!!v.tdsEnabled);
     setStEnabled(!!v.stEnabled);
     setSeTaxEnabled(!!v.serviceTaxEnabled);
-    setTdsAmount(v.tdsAmount || 0);
-    setSTaxAmount(v.sTaxAmount || 0);
+    setTdsAmount(v.tdsAmount || "");
+    setSTaxAmount(v.sTaxAmount || "");
     setMainGroup(v.mainGroup || "");
     setSubGroup(v.subGroup || "");
-    setItems(v.items ? [...v.items] : []);
+    setItems(v.items ? v.items.map(it => ({
+      ...it,
+      debit: it.debit || "",
+      credit: it.credit || ""
+    })) : []);
     setIsModalOpen(true);
   };
 
@@ -78,7 +82,7 @@ export default function JournalVoucher({ database, onSaveVoucher, onDeleteVouche
     const maxNo = vouchersList.reduce((max, current) => {
       const parsed = parseInt(current.voucherNo);
       return isNaN(parsed) ? max : Math.max(max, parsed);
-    }, 176);
+    }, 0);
     setVoucherNo(String(maxNo + 1));
     setVoucherDate(new Date().toISOString().split('T')[0]);
     setBillNo("");
@@ -87,12 +91,12 @@ export default function JournalVoucher({ database, onSaveVoucher, onDeleteVouche
     setTdsEnabled(false);
     setStEnabled(false);
     setSeTaxEnabled(false);
-    setTdsAmount(0);
-    setSTaxAmount(0);
+    setTdsAmount("");
+    setSTaxAmount("");
     setMainGroup("");
     setSubGroup("");
     setItems([
-      { id: "LINE_" + Date.now(), accountCode: "", accountName: "", narration: "", debit: 0, credit: 0 }
+      { id: "LINE_" + Date.now(), accountCode: "", accountName: "", narration: "", debit: "", credit: "" }
     ]);
   };
 
@@ -105,7 +109,7 @@ export default function JournalVoucher({ database, onSaveVoucher, onDeleteVouche
   const addLineItem = () => {
     setItems([
       ...items,
-      { id: "LINE_" + Date.now() + Math.random(), accountCode: "", accountName: "", narration: "", debit: 0, credit: 0 }
+      { id: "LINE_" + Date.now() + Math.random(), accountCode: "", accountName: "", narration: "", debit: "", credit: "" }
     ]);
   };
 
@@ -159,11 +163,11 @@ export default function JournalVoucher({ database, onSaveVoucher, onDeleteVouche
       tdsEnabled,
       stEnabled,
       serviceTaxEnabled: seTaxEnabled,
-      tdsAmount,
-      sTaxAmount,
+      tdsAmount: parseFloat(tdsAmount) || 0,
+      sTaxAmount: parseFloat(sTaxAmount) || 0,
       mainGroup,
       subGroup,
-      items: filteredItems,
+      items: filteredItems.map(it => ({ ...it, debit: parseFloat(it.debit) || 0, credit: parseFloat(it.credit) || 0 })),
       totalAmount: totalDebit
     };
 
@@ -497,12 +501,13 @@ export default function JournalVoucher({ database, onSaveVoucher, onDeleteVouche
                       <input 
                         type="number"
                         step="any"
-                        value={item.debit || ""}
+                        value={item.debit}
                         onChange={(e) => {
-                          const deb = parseFloat(e.target.value) || 0;
-                          updateLineField(item.id, "debit", deb);
-                          if(deb > 0) updateLineField(item.id, "credit", 0);
+                          const val = e.target.value;
+                          updateLineField(item.id, "debit", val);
+                          if(parseFloat(val) > 0) updateLineField(item.id, "credit", "");
                         }}
+                        onWheel={(e) => e.target.blur()}
                         className="w-full p-1.5 border border-[#E2E8F0] rounded text-xs font-mono text-right outline-none focus:ring-1 focus:ring-[#2563EB]"
                         placeholder="0.00"
                       />
@@ -513,12 +518,13 @@ export default function JournalVoucher({ database, onSaveVoucher, onDeleteVouche
                       <input 
                         type="number"
                         step="any"
-                        value={item.credit || ""}
+                        value={item.credit}
                         onChange={(e) => {
-                          const cr = parseFloat(e.target.value) || 0;
-                          updateLineField(item.id, "credit", cr);
-                          if(cr > 0) updateLineField(item.id, "debit", 0);
+                          const val = e.target.value;
+                          updateLineField(item.id, "credit", val);
+                          if(parseFloat(val) > 0) updateLineField(item.id, "debit", "");
                         }}
+                        onWheel={(e) => e.target.blur()}
                         className="w-full p-1.5 border border-[#E2E8F0] rounded text-xs font-mono text-right outline-none focus:ring-1 focus:ring-[#2563EB]"
                         placeholder="0.00"
                       />
@@ -585,9 +591,11 @@ export default function JournalVoucher({ database, onSaveVoucher, onDeleteVouche
             <div className="flex flex-col">
               <label className="text-[10px] uppercase font-bold text-[#64748B] mb-1">TDS Amount</label>
               <input 
-                type="number" 
+                type="number"
+                step="any"
                 value={tdsAmount} 
-                onChange={(e) => setTdsAmount(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setTdsAmount(e.target.value)}
+                onWheel={(e) => e.target.blur()}
                 className="p-2 border border-[#E2E8F0] rounded outline-none focus:ring-1 focus:ring-[#2563EB]"
               />
             </div>
@@ -595,9 +603,11 @@ export default function JournalVoucher({ database, onSaveVoucher, onDeleteVouche
             <div className="flex flex-col">
               <label className="text-[10px] uppercase font-bold text-[#64748B] mb-1">S. Tax Amount</label>
               <input 
-                type="number" 
+                type="number"
+                step="any"
                 value={sTaxAmount} 
-                onChange={(e) => setSTaxAmount(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setSTaxAmount(e.target.value)}
+                onWheel={(e) => e.target.blur()}
                 className="p-2 border border-[#E2E8F0] rounded outline-none focus:ring-1 focus:ring-[#2563EB]"
               />
             </div>
@@ -606,7 +616,7 @@ export default function JournalVoucher({ database, onSaveVoucher, onDeleteVouche
               <label className="text-[10px] uppercase font-bold text-[#64748B] mb-1">Total</label>
               <input 
                 type="number" 
-                value={totalDebit} 
+                value={totalDebit || ""} 
                 readOnly
                 className="p-2 border border-[#E2E8F0] bg-[#F8FAFC] font-mono rounded outline-none focus:ring-1 focus:ring-[#2563EB]"
               />
