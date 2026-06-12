@@ -56,6 +56,7 @@ export default function FFormMaster({ database, onSave, onDelete }) {
         toDate: data.toDate,
         buyerName: data.buyerName,
         fFormNo: data.fFormNo,
+        formAmount: parseFloat(data.formAmount) || 0,
         receivedDate: data.receivedDate,
         totalAmount: calculateTotal(),
         remarks: data.remarks,
@@ -119,6 +120,7 @@ export default function FFormMaster({ database, onSave, onDelete }) {
               <tr className="bg-slate-50 border-b border-[#E2E8F0] text-[#64748B] font-bold uppercase tracking-wider">
                 <th className="p-4">Branch / Party Name</th>
                 <th className="p-4">F-Form No</th>
+                <th className="p-4 text-right">F-Form Amount</th>
                 <th className="p-4">Transfer Period</th>
                 <th className="p-4 text-right">Consolidated Value</th>
                 <th className="p-4 text-center w-24">Actions</th>
@@ -129,6 +131,9 @@ export default function FFormMaster({ database, onSave, onDelete }) {
                 <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                   <td className="p-4 font-bold text-slate-800">{item.buyerName}</td>
                   <td className="p-4 font-mono font-bold text-amber-600 bg-amber-50/30 uppercase tracking-tighter">{item.fFormNo}</td>
+                  <td className="p-4 text-right font-mono font-bold text-slate-700">
+                    {parseFloat(item.formAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </td>
                   <td className="p-4 text-slate-500 font-mono text-[10px]">
                     {item.fromDate} <span className="mx-1 text-slate-300">to</span> {item.toDate}
                   </td>
@@ -189,10 +194,14 @@ export default function FFormMaster({ database, onSave, onDelete }) {
                       <input name="fFormNo" required defaultValue={editingItem?.fFormNo || ""} className="w-full p-2 border border-amber-100 bg-amber-50/20 rounded text-xs font-mono font-bold uppercase" placeholder="FF-0000" />
                     </div>
                     <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">F-Form Amount</label>
+                      <input name="formAmount" type="number" step="any" defaultValue={editingItem?.formAmount || ""} className="w-full p-2 border rounded text-xs font-mono font-bold text-amber-700 bg-amber-50/30" placeholder="0.00" />
+                    </div>
+                    <div className="space-y-1">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">Received Date</label>
                       <input name="receivedDate" type="date" defaultValue={editingItem?.receivedDate || ""} className="w-full p-2 border rounded text-xs font-mono" />
                     </div>
-                    <div className="md:col-span-2 space-y-1">
+                    <div className="md:col-span-1 space-y-1">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">General Remarks</label>
                       <input name="remarks" defaultValue={editingItem?.remarks || ""} className="w-full p-2 border rounded text-xs" placeholder="Notes regarding this transfer set..." />
                     </div>
