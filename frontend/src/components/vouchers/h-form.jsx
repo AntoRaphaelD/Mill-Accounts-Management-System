@@ -56,6 +56,7 @@ export default function HFormMaster({ database, onSave, onDelete }) {
         toDate: data.toDate,
         buyerName: data.buyerName,
         hFormNo: data.hFormNo,
+        formAmount: parseFloat(data.formAmount) || 0,
         receivedDate: data.receivedDate,
         blNo: data.blNo,
         totalAmount: calculateTotal(),
@@ -120,6 +121,7 @@ export default function HFormMaster({ database, onSave, onDelete }) {
               <tr className="bg-slate-50 border-b border-[#E2E8F0] text-[#64748B] font-bold uppercase tracking-wider">
                 <th className="p-4">Buyer / Merchant Exporter</th>
                 <th className="p-4">H-Form No</th>
+                <th className="p-4 text-right">H-Form Amount</th>
                 <th className="p-4">Period / BL No</th>
                 <th className="p-4 text-right">Total Amount</th>
                 <th className="p-4 text-center w-24">Actions</th>
@@ -133,6 +135,9 @@ export default function HFormMaster({ database, onSave, onDelete }) {
                     <div className="text-[10px] text-slate-400 font-mono tracking-tight">{item.remarks || 'No remarks'}</div>
                   </td>
                   <td className="p-4 font-mono font-bold text-rose-600 bg-rose-50/30 uppercase">{item.hFormNo}</td>
+                  <td className="p-4 text-right font-mono font-bold text-slate-700">
+                    {parseFloat(item.formAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </td>
                   <td className="p-4">
                     <div className="text-slate-500 font-mono text-[10px]">
                       {item.fromDate} <span className="mx-1">→</span> {item.toDate}
@@ -195,6 +200,10 @@ export default function HFormMaster({ database, onSave, onDelete }) {
                       <input name="hFormNo" required defaultValue={editingItem?.hFormNo || ""} className="w-full p-2 border rounded text-xs font-mono font-bold text-rose-600 uppercase" placeholder="HF-000" />
                     </div>
                     <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">H-Form Amount</label>
+                      <input name="formAmount" type="number" step="any" defaultValue={editingItem?.formAmount || ""} className="w-full p-2 border rounded text-xs font-mono font-bold text-rose-700 bg-rose-50/30" placeholder="0.00" />
+                    </div>
+                    <div className="space-y-1">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">Received Date</label>
                       <input name="receivedDate" type="date" defaultValue={editingItem?.receivedDate || ""} className="w-full p-2 border rounded text-xs font-mono" />
                     </div>
@@ -202,7 +211,7 @@ export default function HFormMaster({ database, onSave, onDelete }) {
                       <label className="text-[10px] font-bold text-slate-500 uppercase">BL No. (Bill of Lading)</label>
                       <input name="blNo" defaultValue={editingItem?.blNo || ""} className="w-full p-2 border rounded text-xs font-mono" placeholder="SHIP-000" />
                     </div>
-                    <div className="space-y-1">
+                    <div className="md:col-span-4 space-y-1">
                       <label className="text-[10px] font-bold text-slate-500 uppercase">General Remarks</label>
                       <input name="remarks" defaultValue={editingItem?.remarks || ""} className="w-full p-2 border rounded text-xs" />
                     </div>
