@@ -17,6 +17,7 @@ import ReverseBillEntry from "./components/vouchers/ReverseBillEntry";
 import GeneralLedger from "./components/reports/GeneralLedger";
 import ContraEntry from "./components/vouchers/ContraEntry";
 import BankPayment from './components/vouchers/BankPayment';
+import BankReceipt from './components/vouchers/BankReceipt';
 import VoucherFind from "./components/vouchers/VoucherFind";
 import CForm from "./components/vouchers/c-form";
 import FForm from "./components/vouchers/f-form";
@@ -449,13 +450,27 @@ export default function App() {
             </div>
           )}
 
-          {/* TAB 7: CASH & BANK RECEIPTS */}
+          {/* TAB 7: CASH RECEIPTS */}
           {activeTab === "cash-receipt" && (
             <div className="flex-1 overflow-hidden flex flex-col" id="cr-entry-tab">
-              <PageHeader category="Vouchers" title="Cash & Bank Receipts collection" description="Post incoming liquidity balances paid into your drawers (such as refunds or domestic sales)." />
+              <PageHeader category="Vouchers" title="Cash Receipts collection" description="Post incoming liquidity balances paid into your drawers (such as refunds or domestic sales)." />
               <CashPayment 
                 database={db}
                 mode="CR"
+                onSaveVoucher={handleSaveVoucher}
+                onDeleteVoucher={deleteVoucher}
+                onPrint={triggerPrintModal}
+              />
+            </div>
+          )}
+
+          {/* TAB 7B: BANK RECEIPTS */}
+          {activeTab === "bank-receipt" && (
+            <div className="flex-1 overflow-hidden flex flex-col" id="br-entry-tab">
+              <PageHeader category="Vouchers" title="Bank Receipts collection" description="Post incoming liquidity balances paid into your bank accounts." />
+              <BankReceipt 
+                database={db}
+                mode="BR"
                 onSaveVoucher={handleSaveVoucher}
                 onDeleteVoucher={deleteVoucher}
                 onPrint={triggerPrintModal}

@@ -61,12 +61,12 @@ export default function BankPayment({ database, onSaveVoucher, onDeleteVoucher }
   const [seTaxEnabled, setSeTaxEnabled] = useState(false);
   const [stEnabled, setStEnabled] = useState(false);
   
-  const [tdsAmount, setTdsAmount] = useState(0);
-  const [sTaxAmount, setSTaxAmount] = useState(0);
+  const [tdsAmount, setTdsAmount] = useState("");
+  const [sTaxAmount, setSTaxAmount] = useState("");
 
   // Line items for target debit heads
   const [items, setItems] = useState([
-    { id: "L1", accountCode: "", accountName: "", debit: 0 }
+    { id: "L1", accountCode: "", accountName: "", debit: "" }
   ]);
 
   useEffect(() => {
@@ -107,8 +107,8 @@ export default function BankPayment({ database, onSaveVoucher, onDeleteVoucher }
     setTdsEnabled(!!v.tdsEnabled);
     setSeTaxEnabled(!!v.serviceTaxEnabled);
     setStEnabled(!!v.stEnabled);
-    setTdsAmount(v.tdsAmount || 0);
-    setSTaxAmount(v.sTaxAmount || 0);
+    setTdsAmount(v.tdsAmount || "");
+    setSTaxAmount(v.sTaxAmount || "");
 
     if (v.items && v.items.length) {
       const displayLines = v.items
@@ -117,9 +117,9 @@ export default function BankPayment({ database, onSaveVoucher, onDeleteVoucher }
           id: item.id,
           accountCode: item.accountCode,
           accountName: item.accountName,
-          debit: parseFloat(item.debit || 0)
+          debit: item.debit || ""
         }));
-      setItems(displayLines.length ? displayLines : [{ id: "L1", accountCode: "", accountName: "", debit: 0 }]);
+      setItems(displayLines.length ? displayLines : [{ id: "L1", accountCode: "", accountName: "", debit: "" }]);
     }
     setIsModalOpen(true);
   };
@@ -129,7 +129,7 @@ export default function BankPayment({ database, onSaveVoucher, onDeleteVoucher }
     const maxNo = vouchersList.reduce((max, current) => {
       const parsed = parseInt(current.voucherNo);
       return isNaN(parsed) ? max : Math.max(max, parsed);
-    }, 261);
+    }, 0);
     setVoucherNo(String(maxNo + 1));
     setVoucherDate(new Date().toISOString().split('T')[0]);
     setBillNo("");
@@ -144,9 +144,9 @@ export default function BankPayment({ database, onSaveVoucher, onDeleteVoucher }
     setTdsEnabled(false);
     setSeTaxEnabled(false);
     setStEnabled(false);
-    setTdsAmount(0);
-    setSTaxAmount(0);
-    setItems([{ id: "L1", accountCode: "", accountName: "", debit: 0 }]);
+    setTdsAmount("");
+    setSTaxAmount("");
+    setItems([{ id: "L1", accountCode: "", accountName: "", debit: "" }]);
   };
 
   const openNewVoucher = () => {
@@ -155,7 +155,7 @@ export default function BankPayment({ database, onSaveVoucher, onDeleteVoucher }
   };
 
   const addLine = () => {
-    setItems([...items, { id: "LINE_" + Date.now(), accountCode: "", accountName: "", debit: 0 }]);
+    setItems([...items, { id: "LINE_" + Date.now(), accountCode: "", accountName: "", debit: "" }]);
   };
 
   const removeLine = (id) => {
@@ -323,8 +323,8 @@ export default function BankPayment({ database, onSaveVoucher, onDeleteVoucher }
       tdsEnabled,
       stEnabled,
       serviceTaxEnabled: seTaxEnabled,
-      tdsAmount,
-      sTaxAmount,
+      tdsAmount: parseFloat(tdsAmount) || 0,
+      sTaxAmount: parseFloat(sTaxAmount) || 0,
       ledgerType,
       items: doubleEntryLines,
       totalAmount
@@ -333,6 +333,7 @@ export default function BankPayment({ database, onSaveVoucher, onDeleteVoucher }
     const saved = onSaveVoucher(payload);
     setVoucherId(saved.id);
     alert(`Success: saved Bank Payment No. ${voucherNo}`);
+    setIsModalOpen(false);
   };
 
   return (
@@ -459,9 +460,9 @@ export default function BankPayment({ database, onSaveVoucher, onDeleteVoucher }
 
             {/* Tax & Total */}
             <div className="grid grid-cols-3 gap-4 text-xs">
-              <div className="flex flex-col"><label className="text-[10px] uppercase font-bold text-[#64748B] mb-1">TDS Amount</label><input type="number" value={tdsAmount} onChange={(e) => setTdsAmount(parseFloat(e.target.value) || 0)} className="p-2 border border-[#E2E8F0] rounded font-mono" /></div>
-              <div className="flex flex-col"><label className="text-[10px] uppercase font-bold text-[#64748B] mb-1 text-center">Service Tax Amount</label><input type="number" value={sTaxAmount} onChange={(e) => setSTaxAmount(parseFloat(e.target.value) || 0)} className="p-2 border border-[#E2E8F0] rounded font-mono text-center" /></div>
-              <div className="flex flex-col"><label className="text-[10px] uppercase font-bold text-[#64748B] mb-1 text-right">Total</label><input type="number" value={totalAmount} readOnly className="p-2 border border-[#E2E8F0] bg-slate-50 rounded font-mono text-right font-bold" /></div>
+              <div className="flex flex-col"><label className="text-[10px] uppercase font-bold text-[#64748B] mb-1">TDS Amount</label><input type="number" step="any" value={tdsAmount} onChange={(e) => setTdsAmount(e.target.value)} onWheel={(e) => e.target.blur()} className="p-2 border border-[#E2E8F0] rounded font-mono outline-none" /></div>
+              <div className="flex flex-col"><label className="text-[10px] uppercase font-bold text-[#64748B] mb-1 text-center">Service Tax Amount</label><input type="number" step="any" value={sTaxAmount} onChange={(e) => setSTaxAmount(e.target.value)} onWheel={(e) => e.target.blur()} className="p-2 border border-[#E2E8F0] rounded font-mono outline-none text-center" /></div>
+              <div className="flex flex-col"><label className="text-[10px] uppercase font-bold text-[#64748B] mb-1 text-right">Total</label><input type="number" value={totalAmount || ""} readOnly className="p-2 border border-[#E2E8F0] bg-slate-50 rounded font-mono text-right font-bold outline-none" /></div>
             </div>
 
             {/* Narration & Cheque Print Details */}

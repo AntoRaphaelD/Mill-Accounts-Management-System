@@ -174,6 +174,7 @@ export default function JournalVoucher({ database, onSaveVoucher, onDeleteVouche
     const saved = onSaveVoucher(payload);
     setVoucherId(saved.id);
     alert(`Journal Voucher ${voucherNo} saved successfully!`);
+    setIsModalOpen(false);
   };
 
   const triggerPrint = (id) => {

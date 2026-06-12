@@ -52,13 +52,13 @@ export default function CashPayment({
   const [tdsEnabled, setTdsEnabled] = useState(false);
   const [stEnabled, setStEnabled] = useState(false);
   const [seTaxEnabled, setSeTaxEnabled] = useState(false);
-  const [tdsAmount, setTdsAmount] = useState(0);
-  const [sTaxAmount, setSTaxAmount] = useState(0);
+  const [tdsAmount, setTdsAmount] = useState("");
+  const [sTaxAmount, setSTaxAmount] = useState("");
   const [ledgerType, setLedgerType] = useState("");
 
   // Line items for target debit/credit heads
   const [items, setItems] = useState([
-    { id: "L1", accountCode: "", accountName: "", narration: "", amount: 0 }
+    { id: "L1", accountCode: "", accountName: "", narration: "", amount: "" }
   ]);
 
   useEffect(() => {
@@ -104,8 +104,8 @@ export default function CashPayment({
     setTdsEnabled(!!v.tdsEnabled);
     setStEnabled(!!v.stEnabled);
     setSeTaxEnabled(!!v.serviceTaxEnabled);
-    setTdsAmount(v.tdsAmount || 0);
-    setSTaxAmount(v.sTaxAmount || 0);
+    setTdsAmount(v.tdsAmount || "");
+    setSTaxAmount(v.sTaxAmount || "");
     setLedgerType(v.ledgerType || "GENERAL LEDGER");
 
     // reconstruct row entries
@@ -124,10 +124,10 @@ export default function CashPayment({
           accountCode: item.accountCode,
           accountName: item.accountName,
           narration: item.narration,
-          amount: parseFloat(item.debit || item.credit || 0)
+          amount: item.debit || item.credit || ""
         }));
 
-      setItems(displayLines.length ? displayLines : [{ id: "L1", accountCode: "", accountName: "", narration: "", amount: 0 }]);
+      setItems(displayLines.length ? displayLines : [{ id: "L1", accountCode: "", accountName: "", narration: "", amount: "" }]);
     }
     setIsModalOpen(true);
   };
@@ -138,7 +138,7 @@ export default function CashPayment({
     const maxNo = vouchersList.reduce((max, current) => {
       const parsed = parseInt(current.voucherNo);
       return isNaN(parsed) ? max : Math.max(max, parsed);
-    }, 10);
+    }, 0);
     setVoucherNo(String(maxNo + 1));
     setVoucherDate(new Date().toISOString().split('T')[0]);
     setBillNo("");
@@ -150,12 +150,12 @@ export default function CashPayment({
     setTdsEnabled(false);
     setStEnabled(false);
     setSeTaxEnabled(false);
-    setTdsAmount(0);
-    setSTaxAmount(0);
+    setTdsAmount("");
+    setSTaxAmount("");
     setLedgerType("");
     
     // Setting defaults depending on context
-    setItems([{ id: "L1", accountCode: "", accountName: "", narration: "", amount: 0 }]);
+    setItems([{ id: "L1", accountCode: "", accountName: "", narration: "", amount: "" }]);
   };
 
   const openNewVoucher = () => {
@@ -164,7 +164,7 @@ export default function CashPayment({
   };
 
   const addLine = () => {
-    setItems([...items, { id: "LINE_" + Date.now() + Math.random(), accountCode: "", accountName: "", narration: "", amount: 0 }]);
+    setItems([...items, { id: "LINE_" + Date.now() + Math.random(), accountCode: "", accountName: "", narration: "", amount: "" }]);
   };
 
   const removeLine = (id) => {
@@ -409,8 +409,8 @@ export default function CashPayment({
       tdsEnabled,
       stEnabled,
       serviceTaxEnabled: seTaxEnabled,
-      tdsAmount,
-      sTaxAmount,
+      tdsAmount: parseFloat(tdsAmount) || 0,
+      sTaxAmount: parseFloat(sTaxAmount) || 0,
       ledgerType,
       items: doubleEntryLines,
       totalAmount
@@ -419,6 +419,7 @@ export default function CashPayment({
     const saved = onSaveVoucher(payload);
     setVoucherId(saved.id);
     alert(`Success: saved ${mode} No. ${voucherNo}`);
+    setIsModalOpen(false);
   };
 
   return (
@@ -638,8 +639,9 @@ export default function CashPayment({
                       <input 
                         type="number" 
                         step="any"
-                        value={item.amount || ""}
-                        onChange={(e) => updateLine(item.id, "amount", parseFloat(e.target.value) || 0)}
+                        value={item.amount}
+                        onChange={(e) => updateLine(item.id, "amount", e.target.value)}
+                        onWheel={(e) => e.target.blur()}
                         className="w-full p-2 outline-none border rounded font-mono text-right"
                         placeholder="0.00"
                       />
@@ -662,15 +664,15 @@ export default function CashPayment({
           <div className="grid grid-cols-3 gap-4 border-t border-[#E2E8F0] pt-4 mt-2">
             <div className="flex flex-col">
               <label className="text-[10px] uppercase font-bold text-[#64748B] mb-1">TDS Amount</label>
-              <input type="number" value={tdsAmount} onChange={(e) => setTdsAmount(parseFloat(e.target.value) || 0)} className="p-2 border border-[#E2E8F0] rounded font-mono outline-none" />
+              <input type="number" step="any" value={tdsAmount} onChange={(e) => setTdsAmount(e.target.value)} onWheel={(e) => e.target.blur()} className="p-2 border border-[#E2E8F0] rounded font-mono outline-none" />
             </div>
             <div className="flex flex-col text-center">
               <label className="text-[10px] uppercase font-bold text-[#64748B] mb-1">Service Tax Amount</label>
-              <input type="number" value={sTaxAmount} onChange={(e) => setSTaxAmount(parseFloat(e.target.value) || 0)} className="p-2 border border-[#E2E8F0] rounded font-mono outline-none text-center" />
+              <input type="number" step="any" value={sTaxAmount} onChange={(e) => setSTaxAmount(e.target.value)} onWheel={(e) => e.target.blur()} className="p-2 border border-[#E2E8F0] rounded font-mono outline-none text-center" />
             </div>
             <div className="flex flex-col text-right">
               <label className="text-[10px] uppercase font-bold text-[#64748B] mb-1">Total</label>
-              <input type="number" value={totalAmount} readOnly className="p-2 border border-[#E2E8F0] rounded font-mono bg-slate-50 font-bold outline-none text-right" />
+              <input type="number" value={totalAmount || ""} readOnly className="p-2 border border-[#E2E8F0] rounded font-mono bg-slate-50 font-bold outline-none text-right" />
             </div>
           </div>
 

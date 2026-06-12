@@ -53,7 +53,7 @@ export default function CashReceipt({ database, onSaveVoucher, onDeleteVoucher }
 
   // Line items for target credit heads
   const [items, setItems] = useState([
-    { id: "L1", accountCode: "", accountName: "", credit: 0 }
+    { id: "L1", accountCode: "", accountName: "", credit: "" }
   ]);
 
   useEffect(() => {
@@ -95,9 +95,9 @@ export default function CashReceipt({ database, onSaveVoucher, onDeleteVoucher }
           id: item.id,
           accountCode: item.accountCode,
           accountName: item.accountName,
-          credit: parseFloat(item.credit || 0)
+          credit: item.credit || ""
         }));
-      setItems(displayLines.length ? displayLines : [{ id: "L1", accountCode: "", accountName: "", credit: 0 }]);
+      setItems(displayLines.length ? displayLines : [{ id: "L1", accountCode: "", accountName: "", credit: "" }]);
     }
     setIsModalOpen(true);
   };
@@ -115,7 +115,7 @@ export default function CashReceipt({ database, onSaveVoucher, onDeleteVoucher }
     setLedgerType("");
     setCategory("");
     setNarration("");
-    setItems([{ id: "L1", accountCode: "", accountName: "", credit: 0 }]);
+    setItems([{ id: "L1", accountCode: "", accountName: "", credit: "" }]);
   };
 
   const openNewVoucher = () => {
@@ -124,7 +124,7 @@ export default function CashReceipt({ database, onSaveVoucher, onDeleteVoucher }
   };
 
   const addLine = () => {
-    setItems([...items, { id: "LINE_" + Date.now(), accountCode: "", accountName: "", credit: 0 }]);
+    setItems([...items, { id: "LINE_" + Date.now(), accountCode: "", accountName: "", credit: "" }]);
   };
 
   const removeLine = (id) => {
@@ -300,6 +300,7 @@ export default function CashReceipt({ database, onSaveVoucher, onDeleteVoucher }
     const saved = onSaveVoucher(payload);
     setVoucherId(saved.id);
     alert(`Success: saved Cash Receipt No. ${voucherNo}`);
+    setIsModalOpen(false);
   };
 
   return (
@@ -407,7 +408,9 @@ export default function CashReceipt({ database, onSaveVoucher, onDeleteVoucher }
                           {database.accounts.map(acc => (<option key={acc.code} value={acc.code}>{acc.name}</option>))}
                         </select>
                       </td>
-                      <td className="p-1.5"><input type="number" value={item.credit || ""} onChange={(e) => updateLine(item.id, "credit", parseFloat(e.target.value) || 0)} className="w-full p-2 border rounded font-mono text-right outline-none" /></td>
+                      <td className="p-1.5">
+                        <input type="number" step="any" value={item.credit} onChange={(e) => updateLine(item.id, "credit", e.target.value)} onWheel={(e) => e.target.blur()} className="w-full p-2 border rounded font-mono text-right outline-none" placeholder="0.00" />
+                      </td>
                       <td className="p-1.5 text-center"><button onClick={() => removeLine(item.id)} className="text-slate-400 hover:text-red-500"><Trash className="w-4 h-4" /></button></td>
                     </tr>
                   ))}
