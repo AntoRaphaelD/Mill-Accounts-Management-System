@@ -15,9 +15,10 @@
 
   body {
     background-color: var(--bg);
-    color: var(--text);
+    color: #0F172A; /* darker default for easier reading */
     font-family: var(--sans);
     letter-spacing: -0.011em;
+    font-size: 17px;
   }
 }
 

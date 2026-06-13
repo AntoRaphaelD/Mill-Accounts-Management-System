@@ -1,4 +1,4 @@
-import { Account, AppRecord, Group, ServiceTaxMaster, SubGroup, TDSMaster, PLSetting, BSMainGroup, BSGroup, ReverseCharge, BillWiseOpening, CForm, FForm, HForm, E1Form, CFormPurchase } from "../models/index.js";
+import { Account, AppRecord, Group, ServiceTaxMaster, SubGroup, TDSMaster, PLSetting, BSMainGroup, BSGroup, ReverseCharge, BillWiseOpening, CForm, FForm, HForm, E1Form, CFormPurchase, User } from "../models/index.js";
 
 const unwrap = (row) => {
   const plain = row.toJSON();
@@ -59,7 +59,7 @@ export const getMastersState = async () => ({
   hForms: (await HForm.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap),
   e1Forms: (await E1Form.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap),
   cFormPurchases: (await CFormPurchase.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap),
-  users: (await listAppRecords("users")).map(u => ({ id: u.id, username: u.username })) // Security: Omit passwords from frontend initial payload
+  users: (await User.findAll()).map(u => ({ id: u.id, username: u.userName })) // Security: Omit passwords from frontend initial payload
 });
 
 export const saveAccount = (data) => upsertByKey(Account, "code", data, "ACC");
@@ -110,19 +110,17 @@ export const saveUser = (data) => upsertAppRecord("users", "id", data, "U");
 export const deleteUser = (id) => deleteAppRecord("users", id);
 
 export const registerUser = async (username, password) => {
-  const users = await listAppRecords("users");
-  if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+  const existingUser = await User.findOne({ where: { userName: username } });
+  if (existingUser) {
     return { success: false, message: "Username already exists." };
   }
-  const newUser = { id: "U" + Date.now(), username, password };
-  await upsertAppRecord("users", "id", newUser, "U");
+  await User.create({ userName: username, password });
   return { success: true, user: username };
 };
 
 export const loginUser = async (username, password) => {
-  const users = await listAppRecords("users");
-  const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+  const user = await User.findOne({ where: { userName: username } });
   if (!user) return { success: false, message: "User not found. Please create an account." };
   if (user.password !== password) return { success: false, message: "Invalid password." };
-  return { success: true, user: user.username };
+  return { success: true, user: user.userName };
 };
