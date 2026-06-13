@@ -7,11 +7,14 @@ const BASE_URL = "http://localhost:5000"; // Ensure this matches your backend po
 
 // The dynamic local cache state, initialized to empty and filled on runtime module load from the Express backend
 let dbState = createSeedDatabase();
+dbState.currentUser = null; // Force login screen instead of default user
 
 const listeners = new Set();
 
 function withSeedFallback(data) {
   const seed = createSeedDatabase();
+  seed.currentUser = null; // Remove default user from seed
+  seed.users = seed.users || []; // Ensure users array exists
   const merged = { ...seed, ...data };
   for (const key of Object.keys(seed)) {
     if (Array.isArray(seed[key]) && (!Array.isArray(data[key]) || data[key].length === 0)) {
@@ -66,6 +69,10 @@ fetch(`${BASE_URL}/api/db`) // Add the base URL here
   .then(data => {
     if (data && typeof data === "object") {
       dbState = withSeedFallback(data);
+      // Remove any lingering default 'SIVA' user from backend initialization
+      if (dbState.currentUser === "SIVA") {
+        dbState.currentUser = null;
+      }
       notifyDB();
     }
   })
@@ -75,14 +82,42 @@ fetch(`${BASE_URL}/api/db`) // Add the base URL here
 
 // Active user APIs
 export function setCurrentUser(user) {
-  dbState.currentUser = user || "SIVA";
-  addAuditLog("USER LOGGED", `Switched acting user to ${dbState.currentUser}`);
+  dbState.currentUser = user || null;
+  if (user) {
+    addAuditLog("USER LOGGED IN", `User session started for ${dbState.currentUser}`);
+  } else {
+    addAuditLog("USER LOGGED OUT", `User securely logged out`);
+  }
   apiCall("/api/user", "POST", { user });
   notifyDB();
 }
 
 export function getCurrentUser() {
   return dbState.currentUser;
+}
+
+// Authentication
+export async function authenticateUser(username, password, isRegister) {
+  try {
+    const endpoint = isRegister ? "/api/auth/register" : "/api/auth/login";
+    const result = await apiCall(endpoint, "POST", { username, password });
+    
+    if (result && result.success) {
+      if (isRegister) {
+        if (!dbState.users) dbState.users = [];
+        dbState.users.push({ username });
+        notifyDB();
+      }
+      return { success: true, user: result.user };
+    } else {
+      return { 
+        success: false, 
+        message: result?.message || (isRegister ? "Registration failed" : "Invalid credentials") 
+      };
+    }
+  } catch (err) {
+    return { success: false, message: "Server connection failed." };
+  }
 }
 
 // Audit Log APIs

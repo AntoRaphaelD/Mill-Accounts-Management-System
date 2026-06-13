@@ -14,48 +14,53 @@ import {
   ListRestart,
   CreditCard,
   Search,
-  ClipboardList
+  ClipboardList,
+  FileSpreadsheet
 } from "lucide-react";
 
 export default function Sidebar({ activeTab, setActiveTab, currentUser, setCurrentUser }) {
-  const usersList = ["SIVA", "SUDHA", "suresh"];
-
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: BookOpen, category: "Core" },
-    { id: "accounts-master", label: "Accounts Master", icon: Users, category: "Masters" },
+
+    { id: "cash-payment", label: "Cash Payment", icon: Receipt, category: "Payment" },
+    { id: "bank-payment", label: "Bank Payment", icon: CreditCard, category: "Payment" },
+
+    { id: "cash-receipt", label: "Cash Receipt", icon: FileCheck, category: "Receipt" },
+    { id: "bank-receipt", label: "Bank Receipt", icon: FileCheck, category: "Receipt" },
+    { id: "reverse-bill", label: "Reverse Bill Entry", icon: PlusCircle, category: "Receipt" },
+
+    { id: "bank-reconciliation", label: "Bank Reconciliation", icon: FileText, category: "Bank Reconciliation" },
+
+    { id: "journal-voucher", label: "Journal Voucher", icon: FileText, category: "Journal Voucher" },
+
+    { id: "contra-entry", label: "Contra Entry", icon: ListRestart, category: "Contra Entry" },
+
+    { id: "provisions-entry", label: "Provision Entry", icon: Briefcase, category: "Provisions" },
+
     { id: "group-master", label: "Group Master", icon: Layers, category: "Masters" },
     { id: "subgroup-master", label: "Sub Group Master", icon: Layers, category: "Masters" },
-    { id: "tds-master", label: "TDS Type Master", icon: Percent, category: "Masters" },
+    { id: "accounts-master", label: "Account Master", icon: Users, category: "Masters" },
+    { id: "tds-master", label: "TDS Master", icon: Percent, category: "Masters" },
     { id: "st-master", label: "ST Type Master", icon: Percent, category: "Masters" },
     { id: "pl-settings", label: "Profit & Loss Settings", icon: Settings, category: "Masters" },
     { id: "bs-main-group", label: "Balance Sheet Main Group", icon: Layers, category: "Masters" },
     { id: "bs-group", label: "Balance Sheet Group", icon: Layers, category: "Masters" },
     { id: "bill-wise-opening", label: "Bill Wise Opening", icon: FileText, category: "Masters" },
-    { id: "reverse-charge", label: "Reverse Charge Master", icon: Settings, category: "Masters" },
-    
-    { id: "journal-voucher", label: "Journal Voucher", icon: FileText, category: "Vouchers" },
-    { id: "cash-payment", label: "Cash Payment", icon: Receipt, category: "Vouchers" },
-    { id: "bank-payment", label: "Bank Payment", icon: CreditCard, category: "Vouchers" },
-    { id: "cash-receipt", label: "Cash Receipt", icon: FileCheck, category: "Vouchers" },
-    { id: "bank-receipt", label: "Bank Receipt", icon: FileCheck, category: "Vouchers" },
-    { id: "contra-entry", label: "Contra Entry", icon: ListRestart, category: "Vouchers" },
-    { id: "reverse-bill", label: "Reverse Bill Entry", icon: PlusCircle, category: "Vouchers" },
-    { id: "voucher-find", label: "Voucher Find", icon: Search, category: "Vouchers" },
-    { id: "provisions-entry", label: "Provisions Entry", icon: Briefcase, category: "Vouchers" },
-    { id: "debit-note", label: "Debit Note", icon: FileText, category: "Vouchers" },
-    { id: "credit-note", label: "Credit Note", icon: FileText, category: "Vouchers" },
+    { id: "reverse-charge", label: "Reverse Type Master", icon: Settings, category: "Masters" },
 
-    { id: "c-form", label: "C Form", icon: ClipboardList, category: "Tax Forms" },
-    { id: "f-form", label: "F Form", icon: ClipboardList, category: "Tax Forms" },
-    { id: "h-form", label: "H Form", icon: ClipboardList, category: "Tax Forms" },
-    { id: "e1-form", label: "E1 Form", icon: ClipboardList, category: "Tax Forms" },
-    { id: "c-form-purchase", label: "C Form Purchase", icon: ClipboardList, category: "Tax Forms" },
+    { id: "voucher-find", label: "Voucher Search", icon: Search, category: "Voucher Find" },
 
-    { id: "general-ledger", label: "General Ledger", icon: TrendingUp, category: "Reports" },
-    { id: "trial-balance", label: "Trial Balance", icon: TrendingUp, category: "Reports" },
-    { id: "profit-loss", label: "Profit & Loss", icon: TrendingUp, category: "Reports" },
-    { id: "balance-sheet", label: "Balance Sheet", icon: TrendingUp, category: "Reports" },
-    { id: "sales-tax", label: "Tax & TDS Statements", icon: Settings, category: "Reports" },
+    { id: "c-form", label: "C Form", icon: ClipboardList, category: "Sales Tax Forms" },
+    { id: "f-form", label: "F Form", icon: ClipboardList, category: "Sales Tax Forms" },
+    { id: "h-form", label: "H Form", icon: ClipboardList, category: "Sales Tax Forms" },
+    { id: "e1-form", label: "E1 Form", icon: ClipboardList, category: "Sales Tax Forms" },
+    { id: "c-form-purchase", label: "C Form (Purchase)", icon: ClipboardList, category: "Sales Tax Forms" },
+
+    { id: "reports-module", label: "Reports Module", icon: FileSpreadsheet, category: "Reports" },
+
+    { id: "debit-note", label: "Debit Note", icon: FileText, category: "Debit Note" },
+    { id: "credit-note", label: "Credit Note", icon: FileText, category: "Credit Note" },
+
     { id: "audit-logs", label: "Audit Trial Logs", icon: Settings, category: "System" }
   ];
 
@@ -75,22 +80,19 @@ export default function Sidebar({ activeTab, setActiveTab, currentUser, setCurre
       {/* Acting User Selecter */}
       <div className="p-4 bg-slate-50 border-b border-[#E2E8F0] text-xs" id="sidebar-user-selector">
         <label className="block text-[10px] font-semibold text-[#64748B] uppercase tracking-wider mb-2">
-          Acting User (RBAC Match)
+          Logged In User
         </label>
-        <select 
-          value={currentUser} 
-          onChange={(e) => setCurrentUser(e.target.value)}
-          className="w-full p-1.5 bg-white border border-[#E2E8F0] rounded text-xs font-semibold text-[#1E293B] outline-none focus:ring-1 focus:ring-[#2563EB]"
-        >
-          {usersList.map(u => (
-            <option key={u} value={u}>🧑‍💻 {u}</option>
-          ))}
-        </select>
+        <div className="flex items-center justify-between bg-white border border-[#E2E8F0] rounded p-1.5">
+          <span className="font-bold text-[#1E293B] truncate">🧑‍💻 {currentUser}</span>
+          <button onClick={() => setCurrentUser(null)} className="text-red-500 hover:text-red-700 font-semibold cursor-pointer">
+            Logout
+          </button>
+        </div>
       </div>
 
       {/* Main Navigation Item groups */}
       <div className="flex-1 overflow-y-auto py-4" id="sidebar-nav">
-        {["Core", "Masters", "Vouchers", "Tax Forms", "Reports", "System"].map(cat => {
+        {["Core", "Payment", "Receipt", "Bank Reconciliation", "Journal Voucher", "Contra Entry", "Provisions", "Masters", "Voucher Find", "Sales Tax Forms", "Reports", "Debit Note", "Credit Note", "System"].map(cat => {
           const items = menuItems.filter(i => i.category === cat);
           if (items.length === 0) return null;
           return (

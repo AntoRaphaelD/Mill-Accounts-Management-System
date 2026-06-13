@@ -58,7 +58,8 @@ export const getMastersState = async () => ({
   fForms: (await FForm.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap),
   hForms: (await HForm.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap),
   e1Forms: (await E1Form.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap),
-  cFormPurchases: (await CFormPurchase.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap)
+  cFormPurchases: (await CFormPurchase.findAll({ order: [["updatedAt", "DESC"]] })).map(unwrap),
+  users: (await listAppRecords("users")).map(u => ({ id: u.id, username: u.username })) // Security: Omit passwords from frontend initial payload
 });
 
 export const saveAccount = (data) => upsertByKey(Account, "code", data, "ACC");
@@ -105,3 +106,23 @@ export const saveBillWiseOpening = (data) => upsertByKey(BillWiseOpening, "id", 
 export const deleteBillWiseOpening = (id) => destroyByKey(BillWiseOpening, "id", id);
 export const saveClosingStock = (data) => upsertAppRecord("closingStock", "id", data, "CS");
 export const deleteClosingStock = (id) => deleteAppRecord("closingStock", id);
+export const saveUser = (data) => upsertAppRecord("users", "id", data, "U");
+export const deleteUser = (id) => deleteAppRecord("users", id);
+
+export const registerUser = async (username, password) => {
+  const users = await listAppRecords("users");
+  if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+    return { success: false, message: "Username already exists." };
+  }
+  const newUser = { id: "U" + Date.now(), username, password };
+  await upsertAppRecord("users", "id", newUser, "U");
+  return { success: true, user: username };
+};
+
+export const loginUser = async (username, password) => {
+  const users = await listAppRecords("users");
+  const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+  if (!user) return { success: false, message: "User not found. Please create an account." };
+  if (user.password !== password) return { success: false, message: "Invalid password." };
+  return { success: true, user: user.username };
+};
