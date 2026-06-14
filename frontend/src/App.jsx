@@ -323,11 +323,21 @@ const ReportViewerContent = ({ config, database, onClose }) => {
     </div>
   );
 
-  const ReportHeader = ({ title, subtitle }) => (
+  const ReportHeader = ({ title, subtitle, config }) => (
     <div className="text-center mb-6 border-b border-slate-300 pb-4">
       <h2 className="font-bold text-lg tracking-widest text-slate-800">KAYAAR EXPORTS PRIVATE LIMITED</h2>
       <h3 className="font-bold text-sm uppercase mt-1">{title}</h3>
       {subtitle && <p className="text-[10px] text-slate-600 mt-1">{subtitle}</p>}
+      {config && (
+        <div className="mt-3 flex flex-wrap justify-center gap-2 text-[10px] text-slate-500">
+          {config.reportCategory && <span className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">Category: <b>{config.reportCategory}</b></span>}
+          {config.selectedAccount && <span className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">Account: <b>{config.selectedAccount}</b></span>}
+          {config.selectedGroup && <span className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">Group: <b>{config.selectedGroup}</b></span>}
+          {config.selectedMultiAccounts?.length > 0 && <span className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">Accounts: <b>{config.selectedMultiAccounts.join(", ")}</b></span>}
+          {config.searchAll && <span className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded">Search: <b>"{config.searchAll}"</b></span>}
+          {config.condensed && <span className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded font-bold">Condensed Report</span>}
+        </div>
+      )}
     </div>
   );
 
@@ -378,7 +388,7 @@ const ReportViewerContent = ({ config, database, onClose }) => {
     return (
       <div className="w-full">
         <ActionButtons data={data} csvFn={handleCSV} filename={`General_Ledger_${selectedAccount}`} />
-        <ReportHeader title={`LEDGER: ${data.account?.name}`} subtitle={`Period: ${fromDate} to ${toDate}`} />
+        <ReportHeader title={`LEDGER: ${data.account?.name}`} subtitle={`Period: ${fromDate} to ${toDate}`} config={config} />
         <div className="text-right text-[10px] mb-2 font-bold text-slate-600">Opening Balance: Rs. {data.openingBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</div>
         <table className="w-full text-left font-mono text-[11px] border-collapse">
           <thead>
@@ -430,7 +440,7 @@ const ReportViewerContent = ({ config, database, onClose }) => {
     return (
       <div className="w-full">
         <ActionButtons data={data} csvFn={handleCSV} filename={`Trial_Balance_${toDate}`} />
-          <ReportHeader title={reportType} subtitle={`Period: ${fromDate} to ${toDate}`} />
+        <ReportHeader title={reportType} subtitle={`Period: ${fromDate} to ${toDate}`} config={config} />
         <table className="w-full text-left font-mono text-[11px] border-collapse">
           <thead>
             <tr className="border-t border-b border-dashed border-slate-400 py-1">
@@ -481,7 +491,7 @@ const ReportViewerContent = ({ config, database, onClose }) => {
     return (
       <div className="w-full">
         <ActionButtons data={data} csvFn={handleCSV} filename={`Book_${acc}`} />
-        <ReportHeader title={`${reportType}: ${data.account?.name}`} subtitle={`Period: ${fromDate} to ${toDate}`} />
+        <ReportHeader title={`${reportType}: ${data.account?.name}`} subtitle={`Period: ${fromDate} to ${toDate}`} config={config} />
         <div className="text-right text-[10px] mb-2 font-bold text-slate-600">Opening Balance: Rs. {data.openingBalance.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</div>
         <table className="w-full text-left font-mono text-[11px] border-collapse">
           <thead>
@@ -534,7 +544,7 @@ const ReportViewerContent = ({ config, database, onClose }) => {
     return (
       <div className="w-full">
         <ActionButtons data={data} csvFn={handleCSV} filename={`Profit_Loss_${toDate}`} />
-        <ReportHeader title={reportType} subtitle={`Period: ${fromDate} to ${toDate}`} />
+        <ReportHeader title={reportType} subtitle={`Period: ${fromDate} to ${toDate}`} config={config} />
         <table className="w-full text-left font-mono text-[11px] border-collapse">
           <tbody className="divide-y divide-dotted divide-slate-300">
             <tr><td className="py-1.5">Sales Revenue</td><td className="py-1.5 text-right font-bold">{data.salesRevenue.toLocaleString("en-IN", {minimumFractionDigits: 2})}</td></tr>
@@ -580,7 +590,7 @@ const ReportViewerContent = ({ config, database, onClose }) => {
     return (
       <div className="w-full">
         <ActionButtons data={data} csvFn={handleCSV} filename={`Balance_Sheet_${toDate}`} />
-        <ReportHeader title="BALANCE SHEET" subtitle={`Period: ${fromDate} to ${toDate}`} />
+        <ReportHeader title="BALANCE SHEET" subtitle={`Period: ${fromDate} to ${toDate}`} config={config} />
         <div className="grid grid-cols-2 gap-6 font-mono text-[11px]">
           <div className="border-r border-dashed border-slate-300 pr-4">
             <h4 className="font-bold border-b border-slate-400 pb-1 mb-2 text-slate-800">LIABILITIES</h4>
@@ -699,7 +709,7 @@ const ReportViewerContent = ({ config, database, onClose }) => {
     return (
       <div className="w-full">
         <ActionButtons data={data} csvFn={handleCSV} filename={`Voucher_Report_${toDate}`} />
-        <ReportHeader title={`${reportType} REGISTER`} subtitle={`Period: ${fromDate} to ${toDate}`} />
+        <ReportHeader title={`${reportType} REGISTER`} subtitle={`Period: ${fromDate} to ${toDate}`} config={config} />
         <table className="w-full text-left font-mono text-[11px] border-collapse">
           <thead>
             <tr className="border-t border-b border-dashed border-slate-400 py-1">
@@ -819,7 +829,7 @@ const ReportViewerContent = ({ config, database, onClose }) => {
     return (
       <div className="w-full">
         <ActionButtons data={genericRows} csvFn={handleCSV} filename={`${reportType.replace(/\s+/g, '_')}_${toDate}`} />
-        <ReportHeader title={reportType} subtitle={`Period: ${fromDate} to ${toDate}`} />
+        <ReportHeader title={reportType} subtitle={`Period: ${fromDate} to ${toDate}`} config={config} />
         <table className="w-full text-left font-mono text-[11px] border-collapse">
           <thead>
             <tr className="border-t border-b border-dashed border-slate-400 py-1">
