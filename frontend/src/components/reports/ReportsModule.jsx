@@ -16,7 +16,7 @@ const CATEGORIES = [
 const REPORT_TYPES = {
   "Voucher": ["Cash", "Bank", "Journal Voucher", "Contra Entry", "Debit Note", "Credit Note"],
   "Books": ["Cash Book", "Bank Book", "Day Book", "Journal Book"],
-  "Ledger": ["General Ledger", "Sub Ledger", "Sub Ledger All", "From To Party General Ledger", "From To Party Sub Ledger", "Tally Missing Entry"],
+  "Ledger": ["General Ledger", "Sub Ledger", "Ledger Summary", "Ledger Group Summary"],
   "Trial Balance": ["Trial Balance", "Day Book"],
   "Profit & Loss": ["Profit & Loss"],
   "Final Accounts": ["Trading Account", "Profit & Loss Account", "Balance Sheet"],
@@ -32,7 +32,7 @@ export default function ReportsModule({ database, onPrint }) {
 
   const [fromDate, setFromDate] = useState("2026-04-01");
   const [toDate, setToDate] = useState("2026-04-30");
-  const [searchAll, setSearchAll] = useState("");
+  const [searchAll, setSearchAll] = useState(false);
   const [condensed, setCondensed] = useState(false);
   const [excelExport, setExcelExport] = useState(false);
 
@@ -59,6 +59,16 @@ export default function ReportsModule({ database, onPrint }) {
   };
 
   const handleOk = () => {
+    if (activeCategory === "Ledger") {
+      if (!activeReportType) {
+        return alert("Please select a Report Type.");
+      }
+      if (!searchAll) {
+        if (!selectedGroup) return alert("Please select a Ledger Group.");
+        if (!selectedAccount) return alert("Please select a Ledger.");
+      }
+    }
+
     if (onPrint) {
       // Submits filter configuration to trigger separate report viewer
       onPrint({
