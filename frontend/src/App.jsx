@@ -871,7 +871,7 @@ const ReportViewerContent = ({ config, database, onClose }) => {
 
 export default function App() {
   const [db, setDb] = useState(getDB());
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState("journal-voucher");
   
   // Retro print modal states
   const [printedVoucher, setPrintedVoucher] = useState(null);
@@ -912,24 +912,6 @@ export default function App() {
     setPrintedVoucher(vOrReport);
     setIsPrintModalOpen(true);
   };
-
-  // Dynamic Dashboard Stats
-  const tbStats = computeTrialBalance("2026-04-17");
-  const plStats = computeProfitLoss("2026-04-01", "2026-04-17");
-  
-  const cashAccountsTotal = db.accounts
-    .filter(a => a.subGroupName === "CASH - ON - HAND")
-    .reduce((sum, current) => {
-      const tbLine = tbStats.accounts.find(t => t.code === current.code);
-      return sum + (tbLine ? tbLine.balance : (current.openingDebit - current.openingCredit));
-    }, 0);
-
-  const bankAccountsTotal = db.accounts
-    .filter(a => a.subGroupName === "BANK ACCOUNTS")
-    .reduce((sum, current) => {
-      const tbLine = tbStats.accounts.find(t => t.code === current.code);
-      return sum + (tbLine ? tbLine.balance : (current.openingDebit - current.openingCredit));
-    }, 0);
 
   // Protect all application routes behind the auth screen
   if (!db.currentUser) {
@@ -974,114 +956,6 @@ export default function App() {
         {/* Dynamic Route views router */}
         <div className="flex-1 flex flex-col overflow-hidden" id="workspace-viewport">
           
-          {/* TAB 1: DASHBOARD METRICS */}
-          {activeTab === "dashboard" && (
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6" id="dashboard-tab">
-              <PageHeader 
-                category="System" 
-                title="Management Dashboard" 
-                description="Live transactional balances, credit indices, and activity audit streams." 
-              />
-              
-              {/* Financial Metrics Row */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4" id="dashboard-widgets-grid">
-                
-                <div className="bg-white border rounded-lg p-5 shadow-sm">
-                  <div className="flex justify-between items-start mb-2">
-                    <TrendingUp className="w-4 h-4 text-[#2563EB]" />
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Cash in Hand</span>
-                  </div>
-                  <h3 className="font-mono text-lg font-bold text-slate-800">
-                    Rs. {cashAccountsTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                  </h3>
-                  <p className="text-[10px] text-slate-400 mt-1">Sum of cash on hand balances</p>
-                </div>
-
-                <div className="bg-white border rounded-lg p-5 shadow-sm">
-                  <div className="flex justify-between items-start mb-2">
-                    <CreditCard className="w-4 h-4 text-[#2563EB]" />
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Total Bank Assets</span>
-                  </div>
-                  <h3 className="font-mono text-lg font-bold text-[#2563EB]">
-                    Rs. {bankAccountsTotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                  </h3>
-                  <p className="text-[10px] text-slate-400 mt-1">IOB & auxiliary registered bank accounts</p>
-                </div>
-
-                <div className="bg-white border rounded-lg p-5 shadow-sm">
-                  <div className="flex justify-between items-start mb-2">
-                    <Users className="w-4 h-4 text-[#2563EB]" />
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Total Accounts</span>
-                  </div>
-                  <h3 className="font-mono text-lg font-bold text-slate-800">{db.accounts.length} Heads</h3>
-                  <p className="text-[10px] text-slate-400 mt-1">Registered clients & overhead codes</p>
-                </div>
-
-                <div className="bg-white border rounded-lg p-5 shadow-sm">
-                  <div className="flex justify-between items-start mb-2">
-                    <Activity className="w-4 h-4 text-[#2563EB]" />
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Transactions Ledger</span>
-                  </div>
-                  <h3 className="font-mono text-lg font-bold text-[#166534]">{db.vouchers.length} Vouchers</h3>
-                  <p className="text-[10px] text-slate-400 mt-1">Total Journal, Cash, and RCM entries</p>
-                </div>
-
-              </div>
-
-              {/* Combined Balance and Audit logging row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
-                
-                {/* Visual Overview metrics */}
-                <div className="bg-white border border-[#E2E8F0] p-5 rounded-lg flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-3">Enterprise Financial Status Overview</h3>
-                    <div className="space-y-3 font-mono text-xs">
-                      <div className="flex justify-between pb-2 border-b border-dotted">
-                        <span>Total Domestic Subtotal Gross Revenue:</span>
-                        <span className="text-[#166534] font-bold">Rs. {plStats.salesRevenue.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between pb-2 border-b border-dotted">
-                        <span>Estimated Gross Margin Trading:</span>
-                        <span>Rs. {plStats.grossProfit.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between pb-2 border-b border-dotted">
-                        <span>Corporate Net Operating Surplus:</span>
-                        <span className="text-[#2563EB] font-bold">Rs. {plStats.netProfit.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Tax Liability Retentions Estimated:</span>
-                        <span>Rs. {(plStats.salesRevenue * 0.05).toLocaleString()}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-slate-50 border p-3.5 rounded text-slate-500 text-[10px] mt-4 flex items-center gap-2">
-                    <Cpu className="w-4 h-4 text-[#2563EB] shrink-0" />
-                    <span>Durable Local persistence engine synchronizes real-time reports instantly inside the AI Studio preview.</span>
-                  </div>
-                </div>
-
-                {/* Audit Trail indicators */}
-                <div className="bg-white border border-[#E2E8F0] p-5 rounded-lg flex flex-col h-[320px] overflow-hidden">
-                  <h3 className="font-bold text-slate-800 text-xs uppercase tracking-wider mb-3">System audit trail security logs</h3>
-                  <div className="flex-1 overflow-y-auto space-y-2 text-[10.5px]">
-                    {db.auditLogs.map(log => (
-                      <div key={log.id} className="p-2 border border-slate-100 rounded hover:bg-slate-50 font-mono">
-                        <div className="flex justify-between items-center mb-1 font-bold">
-                          <span className="text-[#2563EB]">{log.action}</span>
-                          <span className="text-slate-400 text-[9px]">{log.timestamp}</span>
-                        </div>
-                        <p className="text-slate-600 font-medium mb-1">{log.details}</p>
-                        <div className="text-right text-[9px] text-[#64748B] uppercase font-bold">USER: {log.userName}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          )}
-
           {/* TAB 2: ACCOUNTS MASTER */}
           {activeTab === "accounts-master" && (
             <div className="flex-1 overflow-hidden flex flex-col" id="accounts-master-tab">

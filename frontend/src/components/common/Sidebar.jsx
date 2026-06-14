@@ -1,10 +1,8 @@
 import React from "react";
 import { 
-  BookOpen, 
   Layers, 
   FileText, 
   Settings, 
-  TrendingUp, 
   Users, 
   PlusCircle, 
   Briefcase, 
@@ -20,8 +18,6 @@ import {
 
 export default function Sidebar({ activeTab, setActiveTab, currentUser, setCurrentUser }) {
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: BookOpen, category: "Core" },
-
     { id: "cash-payment", label: "Cash Payment", icon: Receipt, category: "Payment" },
     { id: "bank-payment", label: "Bank Payment", icon: CreditCard, category: "Payment" },
 
@@ -92,7 +88,7 @@ export default function Sidebar({ activeTab, setActiveTab, currentUser, setCurre
 
       {/* Main Navigation Item groups */}
       <div className="flex-1 overflow-y-auto py-4" id="sidebar-nav">
-        {["Core", "Payment", "Receipt", "Bank Reconciliation", "Journal Voucher", "Contra Entry", "Provisions", "Masters", "Voucher Find", "Sales Tax Forms", "Reports", "Debit Note", "Credit Note", "System"].map(cat => {
+        {["Payment", "Receipt", "Bank Reconciliation", "Journal Voucher", "Contra Entry", "Provisions", "Masters", "Voucher Find", "Sales Tax Forms", "Reports", "Debit Note", "Credit Note", "System"].map(cat => {
           const items = menuItems.filter(i => i.category === cat);
           if (items.length === 0) return null;
           return (
