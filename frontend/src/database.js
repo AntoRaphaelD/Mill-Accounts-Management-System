@@ -1,28 +1,34 @@
-import { createSeedDatabase } from "./sampleData";
-
 // Professional ERP database layer with dynamic server API synchronisation and optimistic local state cache.
 // Keeps calculated accounting methods for ledger, cashbook, trial balance, P&L, and balance sheet active.
 
 const BASE_URL = "http://localhost:5000"; // Ensure this matches your backend port
 
 // The dynamic local cache state, initialized to empty and filled on runtime module load from the Express backend
-let dbState = createSeedDatabase();
-dbState.currentUser = null; // Force login screen instead of default user
+let dbState = {
+  groups: [],
+  subGroups: [],
+  accounts: [],
+  vouchers: [],
+  tds: [],
+  serviceTax: [],
+  plSettings: [],
+  bsMainGroups: [],
+  bsGroups: [],
+  reverseTypes: [],
+  reverseBills: [],
+  billWiseOpenings: [],
+  auditLogs: [],
+  closingStock: [],
+  cForms: [],
+  fForms: [],
+  hForms: [],
+  e1Forms: [],
+  cFormPurchases: [],
+  users: [],
+  currentUser: null
+};
 
 const listeners = new Set();
-
-function withSeedFallback(data) {
-  const seed = createSeedDatabase();
-  seed.currentUser = null; // Remove default user from seed
-  seed.users = seed.users || []; // Ensure users array exists
-  const merged = { ...seed, ...data };
-  for (const key of Object.keys(seed)) {
-    if (Array.isArray(seed[key]) && (!Array.isArray(data[key]) || data[key].length === 0)) {
-      merged[key] = seed[key];
-    }
-  }
-  return merged;
-}
 
 export function subscribeToDB(listener) {
   listeners.add(listener);
@@ -68,7 +74,8 @@ fetch(`${BASE_URL}/api/db`) // Add the base URL here
   })
   .then(data => {
     if (data && typeof data === "object") {
-      dbState = withSeedFallback(data);
+      dbState = { ...dbState, ...data };
+      dbState.users = dbState.users || []; // Ensure users array exists
       // Remove any lingering default 'SIVA' user from backend initialization
       if (dbState.currentUser === "SIVA") {
         dbState.currentUser = null;
