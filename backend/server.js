@@ -12,7 +12,9 @@ const port = Number(process.env.PORT || 5000);
 const shouldSync = String(process.env.DB_SYNC).toLowerCase() === "true";
 const shouldAlter = String(process.env.DB_ALTER).toLowerCase() === "true";
 
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
+// Support multiple comma-separated client origins in production (e.g., "https://domain.com,https://www.domain.com")
+const allowedOrigins = process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : "http://localhost:5173";
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json({ limit: "10mb" }));
 
 app.get("/health", (req, res) => {

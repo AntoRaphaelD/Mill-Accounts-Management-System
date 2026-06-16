@@ -1,7 +1,8 @@
 // Professional ERP database layer with dynamic server API synchronisation and optimistic local state cache.
 // Keeps calculated accounting methods for ledger, cashbook, trial balance, P&L, and balance sheet active.
 
-const BASE_URL = "http://localhost:5000"; // Ensure this matches your backend port
+// Use Vite environment variable for production, fallback to localhost for development
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 // The dynamic local cache state, initialized to empty and filled on runtime module load from the Express backend
 let dbState = {
