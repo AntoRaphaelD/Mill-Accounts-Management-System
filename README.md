@@ -1,7 +1,3 @@
-<div align="center">
-  <img width="1200" height="475" alt="ERP Banner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
-
 # AccuFlow ERP (Accounts Management System)
 
 A full-stack accounting/ERP application for maintaining masters and generating accounting vouchers + reports.
